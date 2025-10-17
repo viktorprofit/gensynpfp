@@ -79,10 +79,6 @@
           <div class="thumb" data-mask="cap1" title="Cap A"></div>
           <div class="thumb" data-mask="cap2" title="Cap B"></div>
           <div class="thumb" data-mask="bucket" title="Bucket Hat"></div>
-          <label class="thumb" title="Upload custom">
-            <input id="cap" type="file" accept="image/png,image/svg+xml,image/webp" style="display:none"/>
-            <span style="pointer-events:none">Upload</span>
-          </label>
         </div>
         <div class="row">
           <div>
@@ -122,7 +118,6 @@
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photo');
     const pickPhotoBtn = document.getElementById('pickPhoto');
-    const capInput = document.getElementById('cap');
     const thumbs = document.getElementById('thumbs');
 
     const scaleInput = document.getElementById('scale');
@@ -161,7 +156,6 @@
 
     pickPhotoBtn.addEventListener('click',()=>photoInput.click());
     photoInput.addEventListener('change',async()=>{const f=photoInput.files?.[0];if(!f)return;const img=await loadImageFromFile(f);state.bgImg=img;fitCanvasToImage(img);centerCap(state.capImg||presets.cap1);render();});
-    capInput.addEventListener('change',async()=>{const f=capInput.files?.[0];if(!f)return;const img=await loadImageFromFile(f);state.capImg=img;centerCap(img);render();});
 
     thumbs.addEventListener('click',e=>{const box=e.target.closest('.thumb');if(!box)return;const key=box.getAttribute('data-mask');if(!key)return;state.capImg=presets[key];centerCap(state.capImg);Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active'));box.classList.add('active');render();});
 
