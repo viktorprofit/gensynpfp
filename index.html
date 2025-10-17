@@ -117,6 +117,23 @@
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photo');
+    // Restore visible upload button
+    (function(){
+      const existingLabel = document.getElementById('pickPhotoLabel');
+      if (existingLabel) existingLabel.style.display = 'none';
+      let pickPhotoBtn = document.getElementById('pickPhoto');
+      if (!pickPhotoBtn) {
+        pickPhotoBtn = document.createElement('button');
+        pickPhotoBtn.id = 'pickPhoto';
+        pickPhotoBtn.className = 'btn';
+        pickPhotoBtn.textContent = '➕ Select Image File';
+        // insert after the hidden input
+        if (photoInput && photoInput.parentNode) {
+          photoInput.insertAdjacentElement('afterend', pickPhotoBtn);
+        }
+      }
+      pickPhotoBtn.addEventListener('click', ()=> photoInput.click());
+    })();
     
     const thumbs = document.getElementById('thumbs');
 
