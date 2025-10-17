@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Avatar Mascot Forge</title>
+  <title>Avatar Item Forge</title>
   <style>
     :root{
       --bg:#07120f;--grid:#0e1f1a;--panel:#0a1411;--line:#0f2c1f;--neon:#00ff63;--neon-2:#2bffb1;--text:#e5fff1;--muted:#8cc9ad;
@@ -21,7 +21,6 @@
     .wrap{max-width:1280px;margin:28px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:1fr;}
     @media(min-width:1100px){.wrap{grid-template-columns:1.2fr .9fr}}
 
-    /* Left stage */
     .stage{
       position:relative;background:linear-gradient(180deg,#0a1411,#0b1713);
       border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.45);
@@ -31,7 +30,6 @@
     .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent, var(--neon), transparent);opacity:.5;animation:scan 3.6s linear infinite}
     @keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(640px)}}
 
-    /* Right panel */
     .panel{background:linear-gradient(180deg,#0a1411,#0b1713);border:1px solid var(--line);border-radius:16px;padding:16px}
     .panel + .panel{margin-top:10px}
     .title{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em}
@@ -62,13 +60,11 @@
 </head>
 <body>
   <main class="wrap">
-    <!-- Left: canvas stage -->
     <section class="stage" aria-label="Preview Stage">
       <div class="scan"></div>
       <canvas id="c" width="900" height="900" aria-label="Avatar canvas"></canvas>
     </section>
 
-    <!-- Right: controls -->
     <section>
       <div class="panel">
         <div class="title"><span class="dot"></span> 01. Upload Avatar</div>
@@ -78,13 +74,11 @@
       </div>
 
       <div class="panel">
-        <div class="title"><span class="dot"></span> 02. Select Mascot</div>
+        <div class="title"><span class="dot"></span> 02. Select Item</div>
         <div class="thumbs" id="thumbs">
-          <div class="thumb" data-mask="snake1" title="Snake A"></div>
-          <div class="thumb" data-mask="snake2" title="Snake B"></div>
-          <div class="thumb" data-mask="face1" title="Face A"></div>
-          <div class="thumb" data-mask="face2" title="Face B"></div>
-          <div class="thumb" data-mask="logo" title="LOGO"></div>
+          <div class="thumb" data-mask="cap1" title="Cap A"></div>
+          <div class="thumb" data-mask="cap2" title="Cap B"></div>
+          <div class="thumb" data-mask="bucket" title="Bucket Hat"></div>
           <label class="thumb" title="Upload custom">
             <input id="cap" type="file" accept="image/png,image/svg+xml,image/webp" style="display:none"/>
             <span style="pointer-events:none">Upload</span>
@@ -118,7 +112,7 @@
           <button id="download" class="btn">⬇ Download PNG</button>
           <button id="reset" class="btn secondary">↻ Reset System</button>
         </div>
-        <p class="muted" style="margin-top:8px">Tip: drag the mascot on canvas. Arrows move it precisely; [ / ] rotate; - / + scale.</p>
+        <p class="muted" style="margin-top:8px">Tip: drag the item on canvas. Arrows move it precisely; [ / ] rotate; - / + scale.</p>
       </div>
     </section>
   </main>
@@ -126,7 +120,6 @@
   <script>
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
-
     const photoInput = document.getElementById('photo');
     const pickPhotoBtn = document.getElementById('pickPhoto');
     const capInput = document.getElementById('cap');
@@ -140,154 +133,41 @@
     const resetBtn = document.getElementById('reset');
     const dlBtn = document.getElementById('download');
 
-    const state = {
-      bgImg: null,
-      capImg: null,
-      cap: { x: 0, y: 0, w: 0, h: 0, scale: 1, rot: 0, alpha: 1 },
-    };
+    const state = { bgImg:null, capImg:null, cap:{x:0,y:0,w:0,h:0,scale:1,rot:0,alpha:1} };
 
-    // Helpers
-    function loadImageFromFile(file) {
-      return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
+    function loadImageFromFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);res(img)};img.onerror=rej;img.src=url;});}
+    function fitCanvasToImage(img){const MAX=1400;let w=img.naturalWidth,h=img.naturalHeight;const k=Math.min(1,MAX/Math.max(w,h));canvas.width=Math.round(w*k);canvas.height=Math.round(h*k);}
+    function makeNeonSticker(label){const w=280,h=160;const off=document.createElement('canvas');off.width=w;off.height=h;const g=off.getContext('2d');g.fillStyle='#0c1814';g.fillRect(0,0,w,h);g.strokeStyle='rgba(0,255,99,.6)';g.lineWidth=3;g.strokeRect(8,8,w-16,h-16);g.fillStyle='#00ff63';g.font='bold 28px ui-sans-serif,system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText(label,w/2,h/2);return off;}
 
-    function fitCanvasToImage(img) {
-      const MAX = 1400; // clamp size
-      let w = img.naturalWidth, h = img.naturalHeight;
-      const k = Math.min(1, MAX / Math.max(w, h));
-      canvas.width = Math.round(w * k);
-      canvas.height = Math.round(h * k);
-    }
+    const presets={cap1:makeNeonSticker('CAP A'),cap2:makeNeonSticker('CAP B'),bucket:makeNeonSticker('BUCKET HAT')};
 
-    // Generate simple neon placeholders for thumbs
-    function makeNeonSticker(label) {
-      const w=280,h=160; const off=document.createElement('canvas'); off.width=w; off.height=h; const g=off.getContext('2d');
-      g.fillStyle = '#0c1814'; g.fillRect(0,0,w,h);
-      g.strokeStyle = 'rgba(0,255,99,.6)'; g.lineWidth=3; g.strokeRect(8,8,w-16,h-16);
-      g.fillStyle = '#00ff63'; g.font='bold 28px ui-sans-serif,system-ui'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(label,w/2,h/2);
-      return off;
-    }
+    Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{const key=el.getAttribute('data-mask');if(!key)return;const img=presets[key];const t=document.createElement('img');t.src=img.toDataURL();t.alt=key;t.style.maxWidth='70%';t.style.opacity=.95;el.appendChild(t);});
 
-    const presets = {
-      snake1: makeNeonSticker('SNAKE A'),
-      snake2: makeNeonSticker('SNAKE B'),
-      face1: makeNeonSticker('FACE A'),
-      face2: makeNeonSticker('FACE B'),
-      logo:   makeNeonSticker('LOGO'),
-    };
+    function centerCap(imgLike){const iw=imgLike.width||imgLike.naturalWidth;const ih=imgLike.height||imgLike.naturalHeight;state.cap.w=iw;state.cap.h=ih;state.cap.scale=Math.min(1,canvas.width/iw*0.5);state.cap.rot=0;state.cap.x=canvas.width/2-(iw*state.cap.scale)/2;state.cap.y=canvas.height*0.2;scaleInput.value=String(state.cap.scale);rotateInput.value=String(state.cap.rot);}
+    function render(){ctx.clearRect(0,0,canvas.width,canvas.height);if(state.bgImg){ctx.drawImage(state.bgImg,0,0,canvas.width,canvas.height);}else{ctx.fillStyle='#07120f';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(0,255,99,.08)';for(let x=0;x<canvas.width;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=0;y<canvas.height;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}}const capSource=state.capImg||presets.cap1;const {x,y,w,h,scale,rot,alpha}=state.cap;const cw=w*scale,ch=h*scale;const cx=x+cw/2,cy=y+ch/2;ctx.save();ctx.translate(cx,cy);ctx.rotate(rot*Math.PI/180);ctx.globalAlpha=alpha;ctx.drawImage(capSource,-cw/2,-ch/2,cw,ch);ctx.restore();ctx.globalAlpha=1;}
 
-    // Fill thumbs visuals
-    Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{
-      const key = el.getAttribute('data-mask');
-      if(!key) return;
-      const img = presets[key];
-      const t = document.createElement('img');
-      t.src = img.toDataURL(); t.alt = key; t.style.maxWidth='70%'; t.style.opacity=.95;
-      el.appendChild(t);
-    });
+    let dragging=false;let dragOff={x:0,y:0};
+    function hitCap(mx,my){const{x,y,w,h,scale,rot}=state.cap;const cw=w*scale,ch=h*scale;const cx=x+cw/2,cy=y+ch/2;const dx=mx-cx,dy=my-cy;const ang=-rot*Math.PI/180;const rx=dx*Math.cos(ang)-dy*Math.sin(ang);const ry=dx*Math.sin(ang)+dy*Math.cos(ang);return(rx>=-cw/2&&rx<=cw/2&&ry>=-ch/2&&ry<=ch/2);}
+    canvas.addEventListener('mousedown',e=>{const r=canvas.getBoundingClientRect();const mx=(e.clientX-r.left)*(canvas.width/r.width);const my=(e.clientY-r.top)*(canvas.height/r.height);if(hitCap(mx,my)){dragging=true;dragOff.x=mx-state.cap.x;dragOff.y=my-state.cap.y;}});
+    window.addEventListener('mousemove',e=>{if(!dragging)return;const r=canvas.getBoundingClientRect();const mx=(e.clientX-r.left)*(canvas.width/r.width);const my=(e.clientY-r.top)*(canvas.height/r.height);state.cap.x=mx-dragOff.x;state.cap.y=my-dragOff.y;render();});
+    window.addEventListener('mouseup',()=>dragging=false);
 
-    function centerCap(imgLike){
-      const iw = imgLike.width || imgLike.naturalWidth;
-      const ih = imgLike.height || imgLike.naturalHeight;
-      state.cap.w = iw; state.cap.h = ih; state.cap.scale = Math.min(1, canvas.width / iw * 0.5);
-      state.cap.rot = 0; state.cap.x = canvas.width/2 - (iw*state.cap.scale)/2; state.cap.y = canvas.height*0.2;
-      scaleInput.value = String(state.cap.scale); rotateInput.value = String(state.cap.rot);
-    }
+    scaleInput.addEventListener('input',()=>{state.cap.scale=parseFloat(scaleInput.value||'1');render();});
+    rotateInput.addEventListener('input',()=>{state.cap.rot=parseFloat(rotateInput.value||'0');render();});
+    opacityInput.addEventListener('input',()=>{state.cap.alpha=parseFloat(opacityInput.value||'1');render();});
 
-    function render(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      // Background
-      if(state.bgImg){ ctx.drawImage(state.bgImg, 0, 0, canvas.width, canvas.height); }
-      else {
-        // grid
-        ctx.fillStyle = '#07120f'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.strokeStyle = 'rgba(0,255,99,.08)';
-        for(let x=0;x<canvas.width;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-        for(let y=0;y<canvas.height;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
-      }
-      // Mascot
-      const capSource = state.capImg || presets.logo;
-      const {x,y,w,h,scale,rot,alpha} = state.cap;
-      const cw = w*scale, ch = h*scale; const cx = x + cw/2, cy = y + ch/2;
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot*Math.PI/180); ctx.globalAlpha = alpha;
-      ctx.drawImage(capSource, -cw/2, -ch/2, cw, ch); ctx.restore(); ctx.globalAlpha = 1;
-    }
+    resetBtn.addEventListener('click',()=>{centerCap(state.capImg||presets.cap1);render();});
+    dlBtn.addEventListener('click',()=>{const opt=exportSizeSel.value;if(opt==='orig'){const link=document.createElement('a');link.download='avatar.png';link.href=canvas.toDataURL('image/png');link.click();return;}const size=parseInt(opt,10);const off=document.createElement('canvas');off.width=size;off.height=size;const g=off.getContext('2d');if(state.bgImg){g.drawImage(state.bgImg,0,0,size,size);}else{g.fillStyle='#07120f';g.fillRect(0,0,size,size);}const kx=size/canvas.width,ky=size/canvas.height;const k=Math.min(kx,ky);const capSource=state.capImg||presets.cap1;const{x,y,w,h,scale,rot,alpha}=state.cap;const cw=w*scale*k,ch=h*scale*k;const cx=(x*k)+cw/2,cy=(y*k)+ch/2;g.save();g.translate(cx,cy);g.rotate(rot*Math.PI/180);g.globalAlpha=alpha;g.drawImage(capSource,-cw/2,-ch/2,cw,ch);g.restore();const link=document.createElement('a');link.download='avatar.png';link.href=off.toDataURL('image/png');link.click();});
 
-    // Dragging
-    let dragging=false; let dragOff={x:0,y:0};
-    function hitCap(mx,my){
-      const {x,y,w,h,scale,rot} = state.cap; const cw=w*scale,ch=h*scale; const cx=x+cw/2, cy=y+ch/2;
-      const dx=mx-cx, dy=my-cy; const ang=-rot*Math.PI/180; const rx=dx*Math.cos(ang)-dy*Math.sin(ang); const ry=dx*Math.sin(ang)+dy*Math.cos(ang);
-      return (rx>=-cw/2 && rx<=cw/2 && ry>=-ch/2 && ry<=ch/2);
-    }
-    canvas.addEventListener('mousedown',(e)=>{
-      const r=canvas.getBoundingClientRect(); const mx=(e.clientX-r.left)*(canvas.width/r.width); const my=(e.clientY-r.top)*(canvas.height/r.height);
-      if(hitCap(mx,my)){ dragging=true; dragOff.x = mx - state.cap.x; dragOff.y = my - state.cap.y; }
-    });
-    window.addEventListener('mousemove',(e)=>{
-      if(!dragging) return; const r=canvas.getBoundingClientRect(); const mx=(e.clientX-r.left)*(canvas.width/r.width); const my=(e.clientY-r.top)*(canvas.height/r.height);
-      state.cap.x = mx - dragOff.x; state.cap.y = my - dragOff.y; render();
-    });
-    window.addEventListener('mouseup',()=> dragging=false);
+    pickPhotoBtn.addEventListener('click',()=>photoInput.click());
+    photoInput.addEventListener('change',async()=>{const f=photoInput.files?.[0];if(!f)return;const img=await loadImageFromFile(f);state.bgImg=img;fitCanvasToImage(img);centerCap(state.capImg||presets.cap1);render();});
+    capInput.addEventListener('change',async()=>{const f=capInput.files?.[0];if(!f)return;const img=await loadImageFromFile(f);state.capImg=img;centerCap(img);render();});
 
-    // Controls
-    scaleInput.addEventListener('input',()=>{ state.cap.scale = parseFloat(scaleInput.value||'1'); render(); });
-    rotateInput.addEventListener('input',()=>{ state.cap.rot = parseFloat(rotateInput.value||'0'); render(); });
-    opacityInput.addEventListener('input',()=>{ state.cap.alpha = parseFloat(opacityInput.value||'1'); render(); });
+    thumbs.addEventListener('click',e=>{const box=e.target.closest('.thumb');if(!box)return;const key=box.getAttribute('data-mask');if(!key)return;state.capImg=presets[key];centerCap(state.capImg);Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active'));box.classList.add('active');render();});
 
-    resetBtn.addEventListener('click',()=>{ centerCap(state.capImg||presets.logo); render(); });
+    window.addEventListener('keydown',e=>{const step=e.shiftKey?10:2;let changed=true;if(e.key==='ArrowLeft')state.cap.x-=step;else if(e.key==='ArrowRight')state.cap.x+=step;else if(e.key==='ArrowUp')state.cap.y-=step;else if(e.key==='ArrowDown')state.cap.y+=step;else if(e.key===']')state.cap.rot+=1;else if(e.key==='[')state.cap.rot-=1;else if(e.key==='+'){state.cap.scale=Math.min(3,state.cap.scale+0.02);scaleInput.value=state.cap.scale;}else if(e.key==='-'){state.cap.scale=Math.max(0.2,state.cap.scale-0.02);scaleInput.value=state.cap.scale;}else changed=false;if(changed){e.preventDefault();render();}});
 
-    dlBtn.addEventListener('click',()=>{
-      // optional export size
-      const opt = exportSizeSel.value;
-      if(opt==='orig'){ const link=document.createElement('a'); link.download='avatar.png'; link.href=canvas.toDataURL('image/png'); link.click(); return; }
-      const size=parseInt(opt,10); const off=document.createElement('canvas'); off.width=size; off.height=size; const g=off.getContext('2d');
-      // draw background scaled
-      if(state.bgImg){ g.drawImage(state.bgImg,0,0,size,size); }
-      else { g.fillStyle='#07120f'; g.fillRect(0,0,size,size); }
-      // scale factors from current canvas
-      const kx=size/canvas.width, ky=size/canvas.height; const k=Math.min(kx,ky);
-      const capSource = state.capImg || presets.logo; const {x,y,w,h,scale,rot,alpha} = state.cap; const cw=w*scale*k, ch=h*scale*k; const cx=(x*k)+cw/2, cy=(y*k)+ch/2;
-      g.save(); g.translate(cx,cy); g.rotate(rot*Math.PI/180); g.globalAlpha=alpha; g.drawImage(capSource, -cw/2, -ch/2, cw, ch); g.restore();
-      const link=document.createElement('a'); link.download='avatar.png'; link.href=off.toDataURL('image/png'); link.click();
-    });
-
-    // File pickers
-    pickPhotoBtn.addEventListener('click',()=> photoInput.click());
-    photoInput.addEventListener('change', async ()=>{
-      const f = photoInput.files?.[0]; if(!f) return; const img = await loadImageFromFile(f); state.bgImg = img; fitCanvasToImage(img); centerCap(state.capImg||presets.logo); render();
-    });
-
-    capInput.addEventListener('change', async ()=>{
-      const f = capInput.files?.[0]; if(!f) return; const img = await loadImageFromFile(f); state.capImg = img; centerCap(img); render();
-    });
-
-    thumbs.addEventListener('click',(e)=>{
-      const box = e.target.closest('.thumb'); if(!box) return; const key = box.getAttribute('data-mask'); if(!key) return;
-      state.capImg = presets[key]; centerCap(state.capImg); Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active')); box.classList.add('active'); render();
-    });
-
-    // Keyboard helpers
-    window.addEventListener('keydown',(e)=>{
-      const step = e.shiftKey?10:2; let changed = true;
-      if(e.key==='ArrowLeft') state.cap.x -= step;
-      else if(e.key==='ArrowRight') state.cap.x += step;
-      else if(e.key==='ArrowUp') state.cap.y -= step;
-      else if(e.key==='ArrowDown') state.cap.y += step;
-      else if(e.key===']') state.cap.rot += 1; else if(e.key==='[') state.cap.rot -= 1;
-      else if(e.key==='+') { state.cap.scale = Math.min(3, state.cap.scale + 0.02); scaleInput.value = state.cap.scale; }
-      else if(e.key==='-') { state.cap.scale = Math.max(0.2, state.cap.scale - 0.02); scaleInput.value = state.cap.scale; }
-      else changed=false; if(changed){ e.preventDefault(); render(); }
-    });
-
-    // First render
-    centerCap(presets.logo); render();
+    centerCap(presets.cap1);render();
   </script>
 </body>
 </html>
