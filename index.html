@@ -132,11 +132,27 @@
 
     function loadImageFromFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);res(img)};img.onerror=rej;img.src=url;});}
     function fitCanvasToImage(img){const MAX=1400;let w=img.naturalWidth,h=img.naturalHeight;const k=Math.min(1,MAX/Math.max(w,h));canvas.width=Math.round(w*k);canvas.height=Math.round(h*k);}
-    function makeNeonSticker(label){const w=280,h=160;const off=document.createElement('canvas');off.width=w;off.height=h;const g=off.getContext('2d');g.fillStyle='#0c1814';g.fillRect(0,0,w,h);g.strokeStyle='rgba(0,255,99,.6)';g.lineWidth=3;g.strokeRect(8,8,w-16,h-16);g.fillStyle='#00ff63';g.font='bold 28px ui-sans-serif,system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText(label,w/2,h/2);return off;}
+    function loadImageFromSrc(src){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;});}
 
-    const presets={cap1:makeNeonSticker('CAP A'),cap2:makeNeonSticker('CAP B'),bucket:makeNeonSticker('BUCKET HAT')};
+    // 🔁 Define your real image files here (place them in /items in the repo)
+    const itemPaths={
+      cap1:'items/cap-a.png',
+      cap2:'items/cap-b.png',
+      bucket:'items/bucket-hat.png'
+    };
 
-    Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{const key=el.getAttribute('data-mask');if(!key)return;const img=presets[key];const t=document.createElement('img');t.src=img.toDataURL();t.alt=key;t.style.maxWidth='70%';t.style.opacity=.95;el.appendChild(t);});
+    // Preload images for use on canvas
+    const presets={};
+    Promise.all(Object.entries(itemPaths).map(([k,src])=>loadImageFromSrc(src).then(img=>{presets[k]=img;})))
+      .then(()=>{ /* optionally do something after all loaded */ render(); });
+
+    // Fill thumbnails with the actual images
+    Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{
+      const key=el.getAttribute('data-mask'); if(!key) return;
+      const t=document.createElement('img');
+      t.src=itemPaths[key]; t.alt=key; t.style.maxWidth='90%'; t.style.objectFit='contain'; t.style.opacity=.95;
+      el.appendChild(t);
+    });
 
     function centerCap(imgLike){const iw=imgLike.width||imgLike.naturalWidth;const ih=imgLike.height||imgLike.naturalHeight;state.cap.w=iw;state.cap.h=ih;state.cap.scale=Math.min(1,canvas.width/iw*0.5);state.cap.rot=0;state.cap.x=canvas.width/2-(iw*state.cap.scale)/2;state.cap.y=canvas.height*0.2;scaleInput.value=String(state.cap.scale);rotateInput.value=String(state.cap.rot);}
     function render(){ctx.clearRect(0,0,canvas.width,canvas.height);if(state.bgImg){ctx.drawImage(state.bgImg,0,0,canvas.width,canvas.height);}else{ctx.fillStyle='#07120f';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='rgba(0,255,99,.08)';for(let x=0;x<canvas.width;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}for(let y=0;y<canvas.height;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}}const capSource=state.capImg||presets.cap1;const {x,y,w,h,scale,rot,alpha}=state.cap;const cw=w*scale,ch=h*scale;const cx=x+cw/2,cy=y+ch/2;ctx.save();ctx.translate(cx,cy);ctx.rotate(rot*Math.PI/180);ctx.globalAlpha=alpha;ctx.drawImage(capSource,-cw/2,-ch/2,cw,ch);ctx.restore();ctx.globalAlpha=1;}
