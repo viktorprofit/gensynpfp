@@ -69,7 +69,7 @@
       <div class="panel">
         <div class="title"><span class="dot"></span> 01. Upload Avatar</div>
         <p class="muted" style="margin:8px 0 12px">PNG / JPG — we render locally in your browser.</p>
-        <input id="photo" type="file" accept="image/*" style="display:none"/>
+        <input id=\"photo\" type=\"file\" accept=\"image/png,image/jpeg,image/webp\" style=\"display:none\"/>
         <button id="pickPhoto" class="btn">➕ Select Image File</button>
       </div>
 
@@ -130,7 +130,24 @@
 
     const state = { bgImg:null, capImg:null, cap:{x:0,y:0,w:0,h:0,scale:1,rot:0,alpha:1} };
 
-    function loadImageFromFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);res(img)};img.onerror=rej;img.src=url;});}
+    function loadImageFromFile(file){
+      return new Promise((resolve, reject)=>{
+        const allowed = ['image/png','image/jpeg','image/webp'];
+        if(!allowed.includes(file.type)){
+          reject(new Error('Unsupported format'));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = ()=>{
+          const img = new Image();
+          img.onload = ()=> resolve(img);
+          img.onerror = ()=> reject(new Error('Image decode failed'));
+          img.src = reader.result;
+        };
+        reader.onerror = ()=> reject(new Error('File read failed'));
+        reader.readAsDataURL(file);
+      });
+    }
     function fitCanvasToImage(img){const MAX=1400;let w=img.naturalWidth,h=img.naturalHeight;const k=Math.min(1,MAX/Math.max(w,h));canvas.width=Math.round(w*k);canvas.height=Math.round(h*k);}
     function loadImageFromSrc(src){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=src;});}
 
@@ -171,7 +188,7 @@
     dlBtn.addEventListener('click',()=>{const opt=exportSizeSel.value;if(opt==='orig'){const link=document.createElement('a');link.download='avatar.png';link.href=canvas.toDataURL('image/png');link.click();return;}const size=parseInt(opt,10);const off=document.createElement('canvas');off.width=size;off.height=size;const g=off.getContext('2d');if(state.bgImg){g.drawImage(state.bgImg,0,0,size,size);}else{g.fillStyle='#07120f';g.fillRect(0,0,size,size);}const kx=size/canvas.width,ky=size/canvas.height;const k=Math.min(kx,ky);const capSource=state.capImg||presets.cap1;const{x,y,w,h,scale,rot,alpha}=state.cap;const cw=w*scale*k,ch=h*scale*k;const cx=(x*k)+cw/2,cy=(y*k)+ch/2;g.save();g.translate(cx,cy);g.rotate(rot*Math.PI/180);g.globalAlpha=alpha;g.drawImage(capSource,-cw/2,-ch/2,cw,ch);g.restore();const link=document.createElement('a');link.download='avatar.png';link.href=off.toDataURL('image/png');link.click();});
 
     pickPhotoBtn.addEventListener('click',()=>photoInput.click());
-    photoInput.addEventListener('change',async()=>{const f=photoInput.files?.[0];if(!f)return;const img=await loadImageFromFile(f);state.bgImg=img;fitCanvasToImage(img);centerCap(state.capImg||presets.cap1);render();});
+    photoInput.addEventListener('change', async ()=>{const f=photoInput.files?.[0];if(!f)return;try{const img=await loadImageFromFile(f);state.bgImg=img;fitCanvasToImage(img);centerCap(state.capImg||presets.cap1);render();}catch(err){alert('Unsupported image format. Please upload PNG, JPG, or WebP.');}});
 
     thumbs.addEventListener('click',e=>{const box=e.target.closest('.thumb');if(!box)return;const key=box.getAttribute('data-mask');if(!key)return;state.capImg=presets[key];centerCap(state.capImg);Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active'));box.classList.add('active');render();});
 
