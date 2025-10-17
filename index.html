@@ -119,6 +119,7 @@
   </main>
 
   <script>
+    // --- DOM refs
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photo');
@@ -131,19 +132,23 @@
     const resetBtn = document.getElementById('reset');
     const dlBtn = document.getElementById('download');
 
+    // Open file dialog
     pickPhotoBtn.addEventListener('click', () => photoInput.click());
 
+    // --- State
     const state = { bgImg:null, capImg:null, cap:{x:0,y:0,w:0,h:0,scale:1,rot:0,alpha:1} };
 
+    // --- Helpers
     function loadImageFromFile(file){
       return new Promise((resolve, reject)=>{
         const reader = new FileReader();
         reader.onload = ()=>{
           const img = new Image();
           img.onload = ()=>resolve(img);
-          img.onerror = ()=>reject();
+          img.onerror = ()=>reject(new Error('decode failed'));
           img.src = reader.result;
         };
+        reader.onerror = ()=> reject(new Error('read failed'));
         reader.readAsDataURL(file);
       });
     }
@@ -154,24 +159,28 @@
       canvas.width=Math.round(w*k);canvas.height=Math.round(h*k);
     }
 
+    // Items (must exist in /items/)
     const itemPaths={cap1:'items/cap-a.png',cap2:'items/cap-b.png',bucket:'items/bucket-hat.png'};
-    const presets={};
+    const presets={}; // preloaded images for items
     Object.entries(itemPaths).forEach(([k,src])=>{
-      const i=new Image();i.src=src;presets[k]=i;
+      const i=new Image(); i.src=src; presets[k]=i;
     });
 
+    // Fill thumbnails
     Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{
       const key=el.getAttribute('data-mask');
       const img=document.createElement('img');
       img.src=itemPaths[key];
+      img.alt=key;
       img.style.maxWidth='90%';
+      img.style.objectFit='contain';
       el.appendChild(img);
     });
 
     function centerCap(imgLike){
       const iw=imgLike.width||imgLike.naturalWidth;
       const ih=imgLike.height||imgLike.naturalHeight;
-      state.cap.w=iw;state.cap.h=ih;
+      state.cap.w=iw; state.cap.h=ih;
       state.cap.scale=Math.min(1,canvas.width/iw*0.5);
       state.cap.rot=0;
       state.cap.x=canvas.width/2-(iw*state.cap.scale)/2;
@@ -182,119 +191,128 @@
 
     function render(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      if(state.bgImg){
-        ctx.drawImage(state.bgImg,0,0,canvas.width,canvas.height);
-      }else{
-        ctx.fillStyle='#07120f';ctx.fillRect(0,0,canvas.width,canvas.height);
+      // background
+      if(state.bgImg){ ctx.drawImage(state.bgImg,0,0,canvas.width,canvas.height); }
+      else { ctx.fillStyle='#07120f'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+
+      // draw item only if selected
+      if (state.capImg) {
+        const {x,y,w,h,scale,rot,alpha}=state.cap;
+        const cw=w*scale, ch=h*scale;
+        const cx=x+cw/2, cy=y+ch/2;
+        ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot*Math.PI/180);
+        ctx.globalAlpha=alpha;
+        ctx.drawImage(state.capImg,-cw/2,-ch/2,cw,ch);
+        ctx.restore(); ctx.globalAlpha=1;
       }
-      const capSource=state.capImg||presets.cap1;
-      const {x,y,w,h,scale,rot,alpha}=state.cap;
-      const cw=w*scale,ch=h*scale;const cx=x+cw/2,cy=y+ch/2;
-      ctx.save();ctx.translate(cx,cy);ctx.rotate(rot*Math.PI/180);
-      ctx.globalAlpha=alpha;
-      ctx.drawImage(capSource,-cw/2,-ch/2,cw,ch);
-      ctx.restore();ctx.globalAlpha=1;
     }
 
-    let dragging=false;let dragOff={x:0,y:0};
+    // Dragging
+    let dragging=false; let dragOff={x:0,y:0};
     function hitCap(mx,my){
-      const{x,y,w,h,scale,rot}=state.cap;
-      const cw=w*scale,ch=h*scale;
-      const cx=x+cw/2,cy=y+ch/2;
-      const dx=mx-cx,dy=my-cy;
-      const ang=-rot*Math.PI/180;
+      if(!state.capImg) return false;
+      const {x,y,w,h,scale,rot}=state.cap;
+      const cw=w*scale,ch=h*scale; const cx=x+cw/2,cy=y+ch/2;
+      const dx=mx-cx,dy=my-cy; const ang=-rot*Math.PI/180;
       const rx=dx*Math.cos(ang)-dy*Math.sin(ang);
       const ry=dx*Math.sin(ang)+dy*Math.cos(ang);
-      return(rx>=-cw/2&&rx<=cw/2&&ry>=-ch/2&&ry<=ch/2);
+      return (rx>=-cw/2&&rx<=cw/2&&ry>=-ch/2&&ry<=ch/2);
     }
-
     canvas.addEventListener('mousedown',e=>{
       const r=canvas.getBoundingClientRect();
       const mx=(e.clientX-r.left)*(canvas.width/r.width);
       const my=(e.clientY-r.top)*(canvas.height/r.height);
-      if(hitCap(mx,my)){dragging=true;dragOff.x=mx-state.cap.x;dragOff.y=my-state.cap.y;}
+      if(hitCap(mx,my)){ dragging=true; dragOff.x=mx-state.cap.x; dragOff.y=my-state.cap.y; }
     });
     window.addEventListener('mousemove',e=>{
-      if(!dragging)return;
+      if(!dragging) return;
       const r=canvas.getBoundingClientRect();
       const mx=(e.clientX-r.left)*(canvas.width/r.width);
       const my=(e.clientY-r.top)*(canvas.height/r.height);
-      state.cap.x=mx-dragOff.x;state.cap.y=my-dragOff.y;render();
+      state.cap.x=mx-dragOff.x; state.cap.y=my-dragOff.y; render();
     });
-    window.addEventListener('mouseup',()=>dragging=false);
+    window.addEventListener('mouseup',()=> dragging=false);
 
-    scaleInput.addEventListener('input',()=>{state.cap.scale=parseFloat(scaleInput.value||'1');render();});
-    rotateInput.addEventListener('input',()=>{state.cap.rot=parseFloat(rotateInput.value||'0');render();});
-    opacityInput.addEventListener('input',()=>{state.cap.alpha=parseFloat(opacityInput.value||'1');render();});
+    // Controls
+    scaleInput.addEventListener('input',()=>{ state.cap.scale=parseFloat(scaleInput.value||'1'); render(); });
+    rotateInput.addEventListener('input',()=>{ state.cap.rot=parseFloat(rotateInput.value||'0'); render(); });
+    opacityInput.addEventListener('input',()=>{ state.cap.alpha=parseFloat(opacityInput.value||'1'); render(); });
 
-    resetBtn.addEventListener('click',()=>{centerCap(state.capImg||presets.cap1);render();});
+    // Reset: fully remove selected item
+    resetBtn.addEventListener('click', ()=>{
+      state.capImg = null;
+      Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active'));
+      render();
+    });
+
+    // Download
     dlBtn.addEventListener('click',()=>{
       const opt=exportSizeSel.value;
       if(opt==='orig'){
         const link=document.createElement('a');
         link.download='avatar.png';
         link.href=canvas.toDataURL('image/png');
-        link.click();return;
+        link.click(); return;
       }
       const size=parseInt(opt,10);
-      const off=document.createElement('canvas');
-      off.width=size;off.height=size;
+      const off=document.createElement('canvas'); off.width=size; off.height=size;
       const g=off.getContext('2d');
-      if(state.bgImg){g.drawImage(state.bgImg,0,0,size,size);}else{g.fillStyle='#07120f';g.fillRect(0,0,size,size);}
-      const kx=size/canvas.width,ky=size/canvas.height;
-      const k=Math.min(kx,ky);
-      const capSource=state.capImg||presets.cap1;
-      const{x,y,w,h,scale,rot,alpha}=state.cap;
-      const cw=w*scale*k,ch=h*scale*k;
-      const cx=(x*k)+cw/2,cy=(y*k)+ch/2;
-      g.save();g.translate(cx,cy);g.rotate(rot*Math.PI/180);
-      g.globalAlpha=alpha;
-      g.drawImage(capSource,-cw/2,-ch/2,cw,ch);
-      g.restore();
+      if(state.bgImg){ g.drawImage(state.bgImg,0,0,size,size); } else { g.fillStyle='#07120f'; g.fillRect(0,0,size,size); }
+
+      // draw item only if selected
+      if (state.capImg) {
+        const kx=size/canvas.width, ky=size/canvas.height, k=Math.min(kx,ky);
+        const {x,y,w,h,scale,rot,alpha}=state.cap;
+        const cw=w*scale*k, ch=h*scale*k;
+        const cx=(x*k)+cw/2, cy=(y*k)+ch/2;
+        g.save(); g.translate(cx,cy); g.rotate(rot*Math.PI/180); g.globalAlpha=alpha;
+        g.drawImage(state.capImg, -cw/2, -ch/2, cw, ch);
+        g.restore(); g.globalAlpha=1;
+      }
+
       const link=document.createElement('a');
       link.download='avatar.png';
       link.href=off.toDataURL('image/png');
       link.click();
     });
 
-    photoInput.addEventListener('change',async()=>{
-      const f=photoInput.files?.[0];
-      if(!f)return;
-      const img=await loadImageFromFile(f);
-      state.bgImg=img;
-      fitCanvasToImage(img);
-      centerCap(state.capImg||presets.cap1);
-      render();
+    // Upload avatar
+    photoInput.addEventListener('change', async ()=>{
+      const f=photoInput.files?.[0]; if(!f) return;
+      try{
+        const img=await loadImageFromFile(f);
+        state.bgImg=img; fitCanvasToImage(img); render();
+      }catch(e){ alert('Unsupported image format. Please upload PNG, JPG, or WebP.'); }
     });
 
+    // Select item
     thumbs.addEventListener('click',e=>{
-      const box=e.target.closest('.thumb');
-      if(!box)return;
-      const key=box.getAttribute('data-mask');
-      if(!key)return;
-      state.capImg=presets[key];
+      const box=e.target.closest('.thumb'); if(!box) return;
+      const key=box.getAttribute('data-mask'); if(!key) return;
+      state.capImg = presets[key];
       centerCap(state.capImg);
       Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active'));
       box.classList.add('active');
       render();
     });
 
+    // Keyboard helpers
     window.addEventListener('keydown',e=>{
-      const step=e.shiftKey?10:2;
-      let changed=true;
-      if(e.key==='ArrowLeft')state.cap.x-=step;
-      else if(e.key==='ArrowRight')state.cap.x+=step;
-      else if(e.key==='ArrowUp')state.cap.y-=step;
-      else if(e.key==='ArrowDown')state.cap.y+=step;
-      else if(e.key===']')state.cap.rot+=1;
-      else if(e.key==='[')state.cap.rot-=1;
-      else if(e.key==='+'){state.cap.scale=Math.min(3,state.cap.scale+0.02);scaleInput.value=state.cap.scale;}
-      else if(e.key==='-'){state.cap.scale=Math.max(0.2,state.cap.scale-0.02);scaleInput.value=state.cap.scale;}
+      const step=e.shiftKey?10:2; let changed=true;
+      if(e.key==='ArrowLeft') state.cap.x-=step;
+      else if(e.key==='ArrowRight') state.cap.x+=step;
+      else if(e.key==='ArrowUp') state.cap.y-=step;
+      else if(e.key==='ArrowDown') state.cap.y+=step;
+      else if(e.key===']') state.cap.rot+=1;
+      else if(e.key==='[') state.cap.rot-=1;
+      else if(e.key==='+'){ state.cap.scale=Math.min(3,state.cap.scale+0.02); scaleInput.value=state.cap.scale; }
+      else if(e.key==='-'){ state.cap.scale=Math.max(0.2,state.cap.scale-0.02); scaleInput.value=state.cap.scale; }
       else changed=false;
-      if(changed){e.preventDefault();render();}
+      if(changed){ e.preventDefault(); render(); }
     });
 
-    centerCap(presets.cap1);render();
+    // Initial render (without any item selected)
+    render();
   </script>
 </body>
 </html>
