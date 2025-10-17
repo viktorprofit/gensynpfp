@@ -1,97 +1,152 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Avatar Cap Editor</title>
+  <title>Avatar Mascot Forge</title>
   <style>
-    :root{--bg:#0b0c0f;--panel:#12141a;--text:#e8eaf0;--muted:#a6adbb;--line:#252a36;--accent:#7c5cff}
+    :root{
+      --bg:#07120f;--grid:#0e1f1a;--panel:#0a1411;--line:#0f2c1f;--neon:#00ff63;--neon-2:#2bffb1;--text:#e5fff1;--muted:#8cc9ad;
+    }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
-  background:linear-gradient(180deg,#0b0c0f,#101427);
-  color:var(--text);
-  transform:scale(0.9);
-  transform-origin:top center;}
-    .wrap{max-width:1100px;margin:32px auto;padding:0 16px}
-    h1{font-size:24px;margin:0 0 8px}
-    p{margin:0 0 16px;color:var(--muted)}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media(min-width:980px){.grid{grid-template-columns:360px 1fr}}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
-    label{display:block;margin:10px 0 6px;color:var(--muted)}
-    input[type="file"], input[type="range"], button{width:100%}
-    input[type="range"]{accent-color:var(--accent)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    button{appearance:none;border:1px solid var(--line);background:#1a1f2e;color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
-    button.primary{background:var(--accent);border-color:transparent;color:white;font-weight:600}
-    .note{font-size:12px;color:var(--muted)}
-    canvas{width:100%;background:#0e1426;border:1px dashed #2a3349;border-radius:12px}
-    .kbd{display:inline-block;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:#182036;color:#cbd5ff;font-size:12px}
-    .badgelite{display:inline-flex;gap:8px;align-items:center;border:1px solid #2d3450;border-radius:999px;padding:6px 10px;background:#14192b;color:#c8d0ff;font-size:12px}
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(0,255,99,.08), transparent),
+                  radial-gradient(1200px 600px at 110% 110%, rgba(0,255,99,.06), transparent),
+                  linear-gradient(180deg,#05100d,#0a1512 60%, #06100d);
+      color:var(--text);
+    }
+    .wrap{max-width:1280px;margin:28px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:1fr;}
+    @media(min-width:1100px){.wrap{grid-template-columns:1.2fr .9fr}}
+
+    /* Left stage */
+    .stage{
+      position:relative;background:linear-gradient(180deg,#0a1411,#0b1713);
+      border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.45);
+    }
+    .stage:before,.stage:after{content:"";position:absolute;inset:8px;border:2px solid rgba(0,255,99,.35);border-radius:12px;pointer-events:none}
+    .stage:after{inset:16px;border-color:rgba(0,255,99,.15)}
+    .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent, var(--neon), transparent);opacity:.5;animation:scan 3.6s linear infinite}
+    @keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(640px)}}
+
+    /* Right panel */
+    .panel{background:linear-gradient(180deg,#0a1411,#0b1713);border:1px solid var(--line);border-radius:16px;padding:16px}
+    .panel + .panel{margin-top:10px}
+    .title{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--neon);box-shadow:0 0 0 3px rgba(0,255,99,.25)}
+
+    .btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
+      background:linear-gradient(90deg,var(--neon),var(--neon-2));color:#002b19;border:0;border-radius:12px;padding:14px 16px;
+      font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:transform .08s ease, filter .2s ease}
+    .btn:hover{filter:brightness(1.05)}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+
+    .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .thumb{background:#0c1814;border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:86px;cursor:pointer;position:relative}
+    .thumb.active{outline:2px solid var(--neon)}
+
+    .muted{color:var(--muted);font-size:12px}
+
+    canvas{width:100%;background: #07120f;border:1px dashed rgba(0,255,99,.35);border-radius:12px}
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .input, input[type="range"]{width:100%}
+    input[type="range"]{accent-color:var(--neon)}
+    label{display:block;margin:6px 0;color:var(--muted)}
+
+    .bar{display:flex;gap:10px;margin-top:14px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
-      <h1>🎩 Avatar Cap Editor</h1>
-      <span class="badgelite">Статичний застосунок • Працює на Vercel</span>
-    </div>
-    <p>Завантаж фото, додай зверху кепку (PNG/SVG з прозорістю або скористайся дефолтною), відмасштабуй та поверни — потім завантаж готовий PNG.</p>
+  <main class="wrap">
+    <!-- Left: canvas stage -->
+    <section class="stage" aria-label="Preview Stage">
+      <div class="scan"></div>
+      <canvas id="c" width="900" height="900" aria-label="Avatar canvas"></canvas>
+    </section>
 
-    <div class="grid">
-      <section class="panel" aria-label="Панель керування">
-        <label for="photo">1) Фото / аватар</label>
-        <input id="photo" type="file" accept="image/*"/>
+    <!-- Right: controls -->
+    <section>
+      <div class="panel">
+        <div class="title"><span class="dot"></span> 01. Upload Avatar</div>
+        <p class="muted" style="margin:8px 0 12px">PNG / JPG — we render locally in your browser.</p>
+        <input id="photo" type="file" accept="image/*" style="display:none"/>
+        <button id="pickPhoto" class="btn">➕ Select Image File</button>
+      </div>
 
-        <label for="cap" style="margin-top:12px">2) Кепка / логотип (PNG/SVG з прозорістю) — необов’язково</label>
-        <input id="cap" type="file" accept="image/png,image/svg+xml,image/webp"/>
-
-        <div class="row" style="margin-top:14px">
+      <div class="panel">
+        <div class="title"><span class="dot"></span> 02. Select Mascot</div>
+        <div class="thumbs" id="thumbs">
+          <div class="thumb" data-mask="snake1" title="Snake A"></div>
+          <div class="thumb" data-mask="snake2" title="Snake B"></div>
+          <div class="thumb" data-mask="face1" title="Face A"></div>
+          <div class="thumb" data-mask="face2" title="Face B"></div>
+          <div class="thumb" data-mask="logo" title="LOGO"></div>
+          <label class="thumb" title="Upload custom">
+            <input id="cap" type="file" accept="image/png,image/svg+xml,image/webp" style="display:none"/>
+            <span style="pointer-events:none">Upload</span>
+          </label>
+        </div>
+        <div class="row">
           <div>
-            <label for="scale">Масштаб кепки</label>
+            <label for="scale">Scale</label>
             <input id="scale" type="range" min="0.2" max="3" value="1" step="0.01"/>
           </div>
           <div>
-            <label for="rotate">Поворот (°)</label>
+            <label for="rotate">Rotate (°)</label>
             <input id="rotate" type="range" min="-180" max="180" value="0" step="1"/>
           </div>
         </div>
-
-        <div class="row" style="margin-top:14px">
-          <button id="reset">Скинути позицію</button>
-          <button id="download" class="primary">Завантажити PNG</button>
+        <div class="row">
+          <div>
+            <label for="opacity">Opacity</label>
+            <input id="opacity" type="range" min="0" max="1" value="1" step="0.01"/>
+          </div>
+          <div>
+            <label for="exportSize">Export Size</label>
+            <select id="exportSize" class="input">
+              <option value="orig">Original</option>
+              <option value="512">512 × 512</option>
+              <option value="1024">1024 × 1024</option>
+            </select>
+          </div>
         </div>
-
-        <p class="note" style="margin-top:10px">Підказка: перетягуй кепку мишкою по полотну. Точне налаштування — повзунками.</p>
-      </section>
-
-      <section class="panel" aria-label="Полотно">
-        <canvas id="c" width="800" height="800"></canvas>
-      </section>
-    </div>
-  </div>
+        <div class="bar">
+          <button id="download" class="btn">⬇ Download PNG</button>
+          <button id="reset" class="btn secondary">↻ Reset System</button>
+        </div>
+        <p class="muted" style="margin-top:8px">Tip: drag the mascot on canvas. Arrows move it precisely; [ / ] rotate; - / + scale.</p>
+      </div>
+    </section>
+  </main>
 
   <script>
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
     const photoInput = document.getElementById('photo');
+    const pickPhotoBtn = document.getElementById('pickPhoto');
     const capInput = document.getElementById('cap');
+    const thumbs = document.getElementById('thumbs');
+
     const scaleInput = document.getElementById('scale');
     const rotateInput = document.getElementById('rotate');
+    const opacityInput = document.getElementById('opacity');
+    const exportSizeSel = document.getElementById('exportSize');
+
     const resetBtn = document.getElementById('reset');
     const dlBtn = document.getElementById('download');
 
-    // Державні значення
     const state = {
       bgImg: null,
       capImg: null,
-      cap: { x: 0, y: 0, w: 0, h: 0, scale: 1, rot: 0 },
+      cap: { x: 0, y: 0, w: 0, h: 0, scale: 1, rot: 0, alpha: 1 },
     };
 
-    // Завантажувач зображень
+    // Helpers
     function loadImageFromFile(file) {
       return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -103,147 +158,136 @@
     }
 
     function fitCanvasToImage(img) {
-      const MAX = 1200; // обмеження розміру
+      const MAX = 1400; // clamp size
       let w = img.naturalWidth, h = img.naturalHeight;
       const k = Math.min(1, MAX / Math.max(w, h));
       canvas.width = Math.round(w * k);
       canvas.height = Math.round(h * k);
     }
 
-    function drawDefaultCap(ctx) {
-      // Простий векторний «кап» як дефолт, якщо не завантажили PNG
-      const w = 280, h = 140;
-      const off = document.createElement('canvas');
-      off.width = w; off.height = h;
-      const g = off.getContext('2d');
-      g.fillStyle = '#161b2c';
-      g.strokeStyle = '#7c5cff';
-      g.lineWidth = 3;
-      g.beginPath();
-      g.moveTo(10, h-10); g.quadraticCurveTo(w/2, -40, w-10, h-10); g.closePath();
-      g.fill(); g.stroke();
-      // Козирок
-      g.beginPath();
-      g.moveTo(w*0.2, h-12); g.quadraticCurveTo(w*0.55, h+18, w*0.88, h-4);
-      g.lineWidth = 10; g.strokeStyle = '#2a3355'; g.stroke();
-      // LOGO
-      g.fillStyle = '#cbe1ff';
-      g.font = 'bold 28px system-ui, Inter, Arial';
-      g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText('LOGO', w/2, h/2);
+    // Generate simple neon placeholders for thumbs
+    function makeNeonSticker(label) {
+      const w=280,h=160; const off=document.createElement('canvas'); off.width=w; off.height=h; const g=off.getContext('2d');
+      g.fillStyle = '#0c1814'; g.fillRect(0,0,w,h);
+      g.strokeStyle = 'rgba(0,255,99,.6)'; g.lineWidth=3; g.strokeRect(8,8,w-16,h-16);
+      g.fillStyle = '#00ff63'; g.font='bold 28px ui-sans-serif,system-ui'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(label,w/2,h/2);
       return off;
     }
 
-    const defaultCap = drawDefaultCap(ctx);
+    const presets = {
+      snake1: makeNeonSticker('SNAKE A'),
+      snake2: makeNeonSticker('SNAKE B'),
+      face1: makeNeonSticker('FACE A'),
+      face2: makeNeonSticker('FACE B'),
+      logo:   makeNeonSticker('LOGO'),
+    };
+
+    // Fill thumbs visuals
+    Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{
+      const key = el.getAttribute('data-mask');
+      if(!key) return;
+      const img = presets[key];
+      const t = document.createElement('img');
+      t.src = img.toDataURL(); t.alt = key; t.style.maxWidth='70%'; t.style.opacity=.95;
+      el.appendChild(t);
+    });
 
     function centerCap(imgLike){
       const iw = imgLike.width || imgLike.naturalWidth;
       const ih = imgLike.height || imgLike.naturalHeight;
-      state.cap.w = iw;
-      state.cap.h = ih;
-      state.cap.scale = Math.min(1, canvas.width / iw * 0.5);
-      state.cap.rot = 0;
-      state.cap.x = canvas.width/2 - (iw*state.cap.scale)/2;
-      state.cap.y = canvas.height*0.2; // зверху
-      scaleInput.value = String(state.cap.scale);
-      rotateInput.value = String(state.cap.rot);
+      state.cap.w = iw; state.cap.h = ih; state.cap.scale = Math.min(1, canvas.width / iw * 0.5);
+      state.cap.rot = 0; state.cap.x = canvas.width/2 - (iw*state.cap.scale)/2; state.cap.y = canvas.height*0.2;
+      scaleInput.value = String(state.cap.scale); rotateInput.value = String(state.cap.rot);
     }
 
     function render(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      // фон
+      // Background
       if(state.bgImg){ ctx.drawImage(state.bgImg, 0, 0, canvas.width, canvas.height); }
       else {
-        // порожнє тло
-        ctx.fillStyle = '#0e1426';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = '#2a3349';
-        ctx.font = '16px system-ui, Arial';
-        ctx.fillText('Завантаж фото, щоб почати', 16, 28);
+        // grid
+        ctx.fillStyle = '#07120f'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = 'rgba(0,255,99,.08)';
+        for(let x=0;x<canvas.width;x+=24){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+        for(let y=0;y<canvas.height;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
       }
-
-      // кепка (зображення або дефолт)
-      const capSource = state.capImg || defaultCap;
-      const {x,y,w,h,scale,rot} = state.cap;
-      const cw = w*scale, ch = h*scale;
-      const cx = x + cw/2, cy = y + ch/2;
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rot*Math.PI/180);
-      ctx.drawImage(capSource, -cw/2, -ch/2, cw, ch);
-      ctx.restore();
+      // Mascot
+      const capSource = state.capImg || presets.logo;
+      const {x,y,w,h,scale,rot,alpha} = state.cap;
+      const cw = w*scale, ch = h*scale; const cx = x + cw/2, cy = y + ch/2;
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot*Math.PI/180); ctx.globalAlpha = alpha;
+      ctx.drawImage(capSource, -cw/2, -ch/2, cw, ch); ctx.restore(); ctx.globalAlpha = 1;
     }
 
-    // Перетягування кепки
-    let dragging = false; let dragOff = {x:0,y:0};
+    // Dragging
+    let dragging=false; let dragOff={x:0,y:0};
     function hitCap(mx,my){
-      // Спрощений хіт-бокс: обернене перетворення точки у систему кепки
-      const {x,y,w,h,scale,rot} = state.cap;
-      const cw = w*scale, ch = h*scale;
-      const cx = x + cw/2, cy = y + ch/2;
-      const dx = mx - cx, dy = my - cy;
-      const ang = -rot*Math.PI/180;
-      const rx = dx*Math.cos(ang) - dy*Math.sin(ang);
-      const ry = dx*Math.sin(ang) + dy*Math.cos(ang);
-      return (rx >= -cw/2 && rx <= cw/2 && ry >= -ch/2 && ry <= ch/2);
+      const {x,y,w,h,scale,rot} = state.cap; const cw=w*scale,ch=h*scale; const cx=x+cw/2, cy=y+ch/2;
+      const dx=mx-cx, dy=my-cy; const ang=-rot*Math.PI/180; const rx=dx*Math.cos(ang)-dy*Math.sin(ang); const ry=dx*Math.sin(ang)+dy*Math.cos(ang);
+      return (rx>=-cw/2 && rx<=cw/2 && ry>=-ch/2 && ry<=ch/2);
     }
-
-    canvas.addEventListener('mousedown', (e)=>{
-      const rect = canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
-      const my = (e.clientY - rect.top) * (canvas.height/rect.height);
-      if(hitCap(mx,my)){
-        dragging = true;
-        const {x,y,w,h,scale} = state.cap;
-        const cw = w*scale, ch = h*scale;
-        dragOff.x = mx - x; dragOff.y = my - y;
-      }
+    canvas.addEventListener('mousedown',(e)=>{
+      const r=canvas.getBoundingClientRect(); const mx=(e.clientX-r.left)*(canvas.width/r.width); const my=(e.clientY-r.top)*(canvas.height/r.height);
+      if(hitCap(mx,my)){ dragging=true; dragOff.x = mx - state.cap.x; dragOff.y = my - state.cap.y; }
     });
     window.addEventListener('mousemove',(e)=>{
-      if(!dragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
-      const my = (e.clientY - rect.top) * (canvas.height/rect.height);
-      state.cap.x = mx - dragOff.x;
-      state.cap.y = my - dragOff.y;
-      render();
+      if(!dragging) return; const r=canvas.getBoundingClientRect(); const mx=(e.clientX-r.left)*(canvas.width/r.width); const my=(e.clientY-r.top)*(canvas.height/r.height);
+      state.cap.x = mx - dragOff.x; state.cap.y = my - dragOff.y; render();
     });
     window.addEventListener('mouseup',()=> dragging=false);
 
-    // Контроли
+    // Controls
     scaleInput.addEventListener('input',()=>{ state.cap.scale = parseFloat(scaleInput.value||'1'); render(); });
     rotateInput.addEventListener('input',()=>{ state.cap.rot = parseFloat(rotateInput.value||'0'); render(); });
-    resetBtn.addEventListener('click',()=>{ centerCap(state.capImg||defaultCap); render(); });
+    opacityInput.addEventListener('input',()=>{ state.cap.alpha = parseFloat(opacityInput.value||'1'); render(); });
+
+    resetBtn.addEventListener('click',()=>{ centerCap(state.capImg||presets.logo); render(); });
 
     dlBtn.addEventListener('click',()=>{
-      const link = document.createElement('a');
-      link.download = 'avatar-with-cap.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // optional export size
+      const opt = exportSizeSel.value;
+      if(opt==='orig'){ const link=document.createElement('a'); link.download='avatar.png'; link.href=canvas.toDataURL('image/png'); link.click(); return; }
+      const size=parseInt(opt,10); const off=document.createElement('canvas'); off.width=size; off.height=size; const g=off.getContext('2d');
+      // draw background scaled
+      if(state.bgImg){ g.drawImage(state.bgImg,0,0,size,size); }
+      else { g.fillStyle='#07120f'; g.fillRect(0,0,size,size); }
+      // scale factors from current canvas
+      const kx=size/canvas.width, ky=size/canvas.height; const k=Math.min(kx,ky);
+      const capSource = state.capImg || presets.logo; const {x,y,w,h,scale,rot,alpha} = state.cap; const cw=w*scale*k, ch=h*scale*k; const cx=(x*k)+cw/2, cy=(y*k)+ch/2;
+      g.save(); g.translate(cx,cy); g.rotate(rot*Math.PI/180); g.globalAlpha=alpha; g.drawImage(capSource, -cw/2, -ch/2, cw, ch); g.restore();
+      const link=document.createElement('a'); link.download='avatar.png'; link.href=off.toDataURL('image/png'); link.click();
     });
 
-    // Обробка завантажень
+    // File pickers
+    pickPhotoBtn.addEventListener('click',()=> photoInput.click());
     photoInput.addEventListener('change', async ()=>{
-      const f = photoInput.files?.[0]; if(!f) return;
-      const img = await loadImageFromFile(f);
-      state.bgImg = img;
-      fitCanvasToImage(img);
-      centerCap(state.capImg||defaultCap);
-      render();
+      const f = photoInput.files?.[0]; if(!f) return; const img = await loadImageFromFile(f); state.bgImg = img; fitCanvasToImage(img); centerCap(state.capImg||presets.logo); render();
     });
 
     capInput.addEventListener('change', async ()=>{
-      const f = capInput.files?.[0]; if(!f) return;
-      const img = await loadImageFromFile(f);
-      state.capImg = img;
-      centerCap(img);
-      render();
+      const f = capInput.files?.[0]; if(!f) return; const img = await loadImageFromFile(f); state.capImg = img; centerCap(img); render();
     });
 
-    // Початковий рендер
-    centerCap(defaultCap);
-    render();
+    thumbs.addEventListener('click',(e)=>{
+      const box = e.target.closest('.thumb'); if(!box) return; const key = box.getAttribute('data-mask'); if(!key) return;
+      state.capImg = presets[key]; centerCap(state.capImg); Array.from(thumbs.querySelectorAll('.thumb')).forEach(t=>t.classList.remove('active')); box.classList.add('active'); render();
+    });
+
+    // Keyboard helpers
+    window.addEventListener('keydown',(e)=>{
+      const step = e.shiftKey?10:2; let changed = true;
+      if(e.key==='ArrowLeft') state.cap.x -= step;
+      else if(e.key==='ArrowRight') state.cap.x += step;
+      else if(e.key==='ArrowUp') state.cap.y -= step;
+      else if(e.key==='ArrowDown') state.cap.y += step;
+      else if(e.key===']') state.cap.rot += 1; else if(e.key==='[') state.cap.rot -= 1;
+      else if(e.key==='+') { state.cap.scale = Math.min(3, state.cap.scale + 0.02); scaleInput.value = state.cap.scale; }
+      else if(e.key==='-') { state.cap.scale = Math.max(0.2, state.cap.scale - 0.02); scaleInput.value = state.cap.scale; }
+      else changed=false; if(changed){ e.preventDefault(); render(); }
+    });
+
+    // First render
+    centerCap(presets.logo); render();
   </script>
 </body>
 </html>
