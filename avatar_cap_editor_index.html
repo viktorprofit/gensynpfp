@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Avatar Cap Editor</title>
+  <style>
+    :root{--bg:#0b0c0f;--panel:#12141a;--text:#e8eaf0;--muted:#a6adbb;--line:#252a36;--accent:#7c5cff}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:linear-gradient(180deg,#0b0c0f,#101427);color:var(--text)}
+    .wrap{max-width:1100px;margin:32px auto;padding:0 16px}
+    h1{font-size:24px;margin:0 0 8px}
+    p{margin:0 0 16px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.grid{grid-template-columns:360px 1fr}}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+    label{display:block;margin:10px 0 6px;color:var(--muted)}
+    input[type="file"], input[type="range"], button{width:100%}
+    input[type="range"]{accent-color:var(--accent)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{appearance:none;border:1px solid var(--line);background:#1a1f2e;color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
+    button.primary{background:var(--accent);border-color:transparent;color:white;font-weight:600}
+    .note{font-size:12px;color:var(--muted)}
+    canvas{width:100%;background:#0e1426;border:1px dashed #2a3349;border-radius:12px}
+    .kbd{display:inline-block;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:#182036;color:#cbd5ff;font-size:12px}
+    .badgelite{display:inline-flex;gap:8px;align-items:center;border:1px solid #2d3450;border-radius:999px;padding:6px 10px;background:#14192b;color:#c8d0ff;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+      <h1>🎩 Avatar Cap Editor</h1>
+      <span class="badgelite">Статичний застосунок • Працює на Vercel</span>
+    </div>
+    <p>Завантаж фото, додай зверху кепку (PNG/SVG з прозорістю або скористайся дефолтною), відмасштабуй та поверни — потім завантаж готовий PNG.</p>
+
+    <div class="grid">
+      <section class="panel" aria-label="Панель керування">
+        <label for="photo">1) Фото / аватар</label>
+        <input id="photo" type="file" accept="image/*"/>
+
+        <label for="cap" style="margin-top:12px">2) Кепка / логотип (PNG/SVG з прозорістю) — необов’язково</label>
+        <input id="cap" type="file" accept="image/png,image/svg+xml,image/webp"/>
+
+        <div class="row" style="margin-top:14px">
+          <div>
+            <label for="scale">Масштаб кепки</label>
+            <input id="scale" type="range" min="0.2" max="3" value="1" step="0.01"/>
+          </div>
+          <div>
+            <label for="rotate">Поворот (°)</label>
+            <input id="rotate" type="range" min="-180" max="180" value="0" step="1"/>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px">
+          <button id="reset">Скинути позицію</button>
+          <button id="download" class="primary">Завантажити PNG</button>
+        </div>
+
+        <p class="note" style="margin-top:10px">Підказка: перетягуй кепку мишкою по полотну. Точне налаштування — повзунками.</p>
+      </section>
+
+      <section class="panel" aria-label="Полотно">
+        <canvas id="c" width="800" height="800"></canvas>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    const photoInput = document.getElementById('photo');
+    const capInput = document.getElementById('cap');
+    const scaleInput = document.getElementById('scale');
+    const rotateInput = document.getElementById('rotate');
+    const resetBtn = document.getElementById('reset');
+    const dlBtn = document.getElementById('download');
+
+    // Державні значення
+    const state = {
+      bgImg: null,
+      capImg: null,
+      cap: { x: 0, y: 0, w: 0, h: 0, scale: 1, rot: 0 },
+    };
+
+    // Завантажувач зображень
+    function loadImageFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    function fitCanvasToImage(img) {
+      const MAX = 1200; // обмеження розміру
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, MAX / Math.max(w, h));
+      canvas.width = Math.round(w * k);
+      canvas.height = Math.round(h * k);
+    }
+
+    function drawDefaultCap(ctx) {
+      // Простий векторний «кап» як дефолт, якщо не завантажили PNG
+      const w = 280, h = 140;
+      const off = document.createElement('canvas');
+      off.width = w; off.height = h;
+      const g = off.getContext('2d');
+      g.fillStyle = '#161b2c';
+      g.strokeStyle = '#7c5cff';
+      g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(10, h-10); g.quadraticCurveTo(w/2, -40, w-10, h-10); g.closePath();
+      g.fill(); g.stroke();
+      // Козирок
+      g.beginPath();
+      g.moveTo(w*0.2, h-12); g.quadraticCurveTo(w*0.55, h+18, w*0.88, h-4);
+      g.lineWidth = 10; g.strokeStyle = '#2a3355'; g.stroke();
+      // LOGO
+      g.fillStyle = '#cbe1ff';
+      g.font = 'bold 28px system-ui, Inter, Arial';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText('LOGO', w/2, h/2);
+      return off;
+    }
+
+    const defaultCap = drawDefaultCap(ctx);
+
+    function centerCap(imgLike){
+      const iw = imgLike.width || imgLike.naturalWidth;
+      const ih = imgLike.height || imgLike.naturalHeight;
+      state.cap.w = iw;
+      state.cap.h = ih;
+      state.cap.scale = Math.min(1, canvas.width / iw * 0.5);
+      state.cap.rot = 0;
+      state.cap.x = canvas.width/2 - (iw*state.cap.scale)/2;
+      state.cap.y = canvas.height*0.2; // зверху
+      scaleInput.value = String(state.cap.scale);
+      rotateInput.value = String(state.cap.rot);
+    }
+
+    function render(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // фон
+      if(state.bgImg){ ctx.drawImage(state.bgImg, 0, 0, canvas.width, canvas.height); }
+      else {
+        // порожнє тло
+        ctx.fillStyle = '#0e1426';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#2a3349';
+        ctx.font = '16px system-ui, Arial';
+        ctx.fillText('Завантаж фото, щоб почати', 16, 28);
+      }
+
+      // кепка (зображення або дефолт)
+      const capSource = state.capImg || defaultCap;
+      const {x,y,w,h,scale,rot} = state.cap;
+      const cw = w*scale, ch = h*scale;
+      const cx = x + cw/2, cy = y + ch/2;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot*Math.PI/180);
+      ctx.drawImage(capSource, -cw/2, -ch/2, cw, ch);
+      ctx.restore();
+    }
+
+    // Перетягування кепки
+    let dragging = false; let dragOff = {x:0,y:0};
+    function hitCap(mx,my){
+      // Спрощений хіт-бокс: обернене перетворення точки у систему кепки
+      const {x,y,w,h,scale,rot} = state.cap;
+      const cw = w*scale, ch = h*scale;
+      const cx = x + cw/2, cy = y + ch/2;
+      const dx = mx - cx, dy = my - cy;
+      const ang = -rot*Math.PI/180;
+      const rx = dx*Math.cos(ang) - dy*Math.sin(ang);
+      const ry = dx*Math.sin(ang) + dy*Math.cos(ang);
+      return (rx >= -cw/2 && rx <= cw/2 && ry >= -ch/2 && ry <= ch/2);
+    }
+
+    canvas.addEventListener('mousedown', (e)=>{
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
+      const my = (e.clientY - rect.top) * (canvas.height/rect.height);
+      if(hitCap(mx,my)){
+        dragging = true;
+        const {x,y,w,h,scale} = state.cap;
+        const cw = w*scale, ch = h*scale;
+        dragOff.x = mx - x; dragOff.y = my - y;
+      }
+    });
+    window.addEventListener('mousemove',(e)=>{
+      if(!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
+      const my = (e.clientY - rect.top) * (canvas.height/rect.height);
+      state.cap.x = mx - dragOff.x;
+      state.cap.y = my - dragOff.y;
+      render();
+    });
+    window.addEventListener('mouseup',()=> dragging=false);
+
+    // Контроли
+    scaleInput.addEventListener('input',()=>{ state.cap.scale = parseFloat(scaleInput.value||'1'); render(); });
+    rotateInput.addEventListener('input',()=>{ state.cap.rot = parseFloat(rotateInput.value||'0'); render(); });
+    resetBtn.addEventListener('click',()=>{ centerCap(state.capImg||defaultCap); render(); });
+
+    dlBtn.addEventListener('click',()=>{
+      const link = document.createElement('a');
+      link.download = 'avatar-with-cap.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Обробка завантажень
+    photoInput.addEventListener('change', async ()=>{
+      const f = photoInput.files?.[0]; if(!f) return;
+      const img = await loadImageFromFile(f);
+      state.bgImg = img;
+      fitCanvasToImage(img);
+      centerCap(state.capImg||defaultCap);
+      render();
+    });
+
+    capInput.addEventListener('change', async ()=>{
+      const f = capInput.files?.[0]; if(!f) return;
+      const img = await loadImageFromFile(f);
+      state.capImg = img;
+      centerCap(img);
+      render();
+    });
+
+    // Початковий рендер
+    centerCap(defaultCap);
+    render();
+  </script>
+</body>
+</html>
