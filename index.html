@@ -6,37 +6,46 @@
   <title>Avatar Item Forge</title>
   <style>
     :root{
-      --bg:#07120f;--grid:#0e1f1a;--panel:#0a1411;--line:#0f2c1f;
-      --neon:#00ff63;--neon-2:#2bffb1;--text:#e5fff1;--muted:#8cc9ad;
+      --bg:#0a0a0a;            /* Background */
+      --panel:#121212;         /* Panels */
+      --line:#3a1a12;          /* Deep brown line */
+      --accent:#fad7d1;        /* Primary Pink */
+      --accent-2:#f3c2b9;      /* Pink shade */
+      --text:#ffffff;          /* White */
+      --muted:#d7b9b3;         /* Soft pink-muted */
+      --deep-brown:#230800;    /* Deep Brown for text on pink */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
-      background: radial-gradient(1200px 600px at 10% -10%, rgba(0,255,99,.08), transparent),
-                  radial-gradient(1200px 600px at 110% 110%, rgba(0,255,99,.06), transparent),
-                  linear-gradient(180deg,#05100d,#0a1512 60%, #06100d);
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(250,215,209,.07), transparent),
+                  radial-gradient(1200px 600px at 110% 110%, rgba(250,215,209,.06), transparent),
+                  linear-gradient(180deg,#0a0a0a,#0a0a0a 60%, #0a0a0a);
       color:var(--text);
     }
     .wrap{max-width:1280px;margin:28px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:1fr;}
     @media(min-width:1100px){.wrap{grid-template-columns:1.2fr .9fr}}
 
+    /* Stage / canvas container */
     .stage{
-      position:relative;background:linear-gradient(180deg,#0a1411,#0b1713);
+      position:relative;background:linear-gradient(180deg,#111,#0f0f0f);
       border:1px solid var(--line);border-radius:16px;padding:18px;
-      box-shadow:0 20px 60px rgba(0,0,0,.45);
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
     }
-    .stage:before,.stage:after{content:"";position:absolute;inset:8px;border:2px solid rgba(0,255,99,.35);border-radius:12px;pointer-events:none}
-    .stage:after{inset:16px;border-color:rgba(0,255,99,.15)}
-    .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent, var(--neon), transparent);opacity:.5;animation:scan 3.6s linear infinite}
+    .stage:before,.stage:after{content:"";position:absolute;inset:8px;border:2px solid rgba(250,215,209,.35);border-radius:12px;pointer-events:none}
+    .stage:after{inset:16px;border-color:rgba(250,215,209,.18)}
+    .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent, var(--accent), transparent);opacity:.5;animation:scan 3.6s linear infinite}
     @keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(640px)}}
 
-    .panel{background:linear-gradient(180deg,#0a1411,#0b1713);border:1px solid var(--line);border-radius:16px;padding:16px}
+    /* Panels */
+    .panel{background:linear-gradient(180deg,#121212,#111);border:1px solid var(--line);border-radius:16px;padding:16px}
     .panel + .panel{margin-top:10px}
     .title{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em}
-    .dot{width:8px;height:8px;border-radius:999px;background:var(--neon);box-shadow:0 0 0 3px rgba(0,255,99,.25)}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 3px rgba(250,215,209,.25)}
 
+    /* Buttons */
     .btn{
       appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
       background:#1a1f2e;color:var(--text);border:1px solid var(--line);
@@ -44,21 +53,25 @@
       cursor:pointer;transition:transform .08s ease, filter .2s ease;text-transform:uppercase;
     }
     .btn.primary{
-      background:linear-gradient(90deg,var(--neon),var(--neon-2));
-      border:0;color:#002b19;font-weight:800;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      border:0;color:var(--deep-brown);font-weight:800;
     }
     .btn:hover{filter:brightness(1.05)}
     .btn:active{transform:translateY(1px)}
 
+    /* Thumbs */
     .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-    .thumb{background:#0c1814;border:1px solid var(--line);border-radius:12px;
-      display:flex;align-items:center;justify-content:center;min-height:86px;
-      cursor:pointer;position:relative}
-    .thumb.active{outline:2px solid var(--neon)}
+    .thumb{background:#141414;border:1px solid var(--line);border-radius:12px;
+      display:flex;align-items:center;justify-content:center;min-height:86px;cursor:pointer;position:relative}
+    .thumb.active{outline:2px solid var(--accent)}
     .muted{color:var(--muted);font-size:12px}
-    canvas{width:100%;background:#07120f;border:1px dashed rgba(0,255,99,.35);border-radius:12px}
+
+    /* Canvas */
+    canvas{width:100%;background:#0a0a0a;border:1px dashed rgba(250,215,209,.35);border-radius:12px}
+
+    /* Controls */
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    input[type="range"]{width:100%;accent-color:var(--neon)}
+    input[type="range"]{width:100%;accent-color:var(--accent)}
     label{display:block;margin:6px 0;color:var(--muted)}
     .bar{display:flex;gap:10px;margin-top:14px}
   </style>
@@ -193,7 +206,7 @@
       ctx.clearRect(0,0,canvas.width,canvas.height);
       // background
       if(state.bgImg){ ctx.drawImage(state.bgImg,0,0,canvas.width,canvas.height); }
-      else { ctx.fillStyle='#07120f'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+      else { ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,canvas.width,canvas.height); }
 
       // draw item only if selected
       if (state.capImg) {
@@ -257,7 +270,7 @@
       const size=parseInt(opt,10);
       const off=document.createElement('canvas'); off.width=size; off.height=size;
       const g=off.getContext('2d');
-      if(state.bgImg){ g.drawImage(state.bgImg,0,0,size,size); } else { g.fillStyle='#07120f'; g.fillRect(0,0,size,size); }
+      if(state.bgImg){ g.drawImage(state.bgImg,0,0,size,size); } else { g.fillStyle='#0a0a0a'; g.fillRect(0,0,size,size); }
 
       // draw item only if selected
       if (state.capImg) {
