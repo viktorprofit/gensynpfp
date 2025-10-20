@@ -32,6 +32,7 @@
       --line:#3a1a12;
       --accent:#fad7d1;
       --accent-2:#f3c2b9;
+      --accent-3:#ffc9be; /* трохи насиченіший відтінок для hover */
       --text:#ffffff;
       --muted:#d7b9b3;
       --deep-brown:#230800;
@@ -70,7 +71,7 @@
     .panel + .panel{margin-top:10px}
     .title{
       display:flex;align-items:center;gap:10px;
-      font-weight:700;font-size:20px; /* без 01./02., робимо виразніше */
+      font-weight:700;font-size:20px;
       letter-spacing:.01em;
     }
     .dot{width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 3px rgba(250,215,209,.25)}
@@ -80,25 +81,74 @@
     .btn{
       appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
       background:#1a1f2e;color:var(--text);border:1px solid var(--line);
-      border-radius:12px;padding:14px 16px; /* НЕ змінюємо падинги */
-      font-family:"Mondwest", system-ui, sans-serif; /* текст кнопок — Mondwest */
-      font-weight:700; /* жирніше */
-      font-size:18px;  /* помітніше, без зміни падингів */
+      border-radius:12px;padding:14px 16px; /* не чіпаємо розміри */
+      font-family:"Mondwest", system-ui, sans-serif;
+      font-weight:700;
+      font-size:18px;
       letter-spacing:.04em;text-transform:uppercase;
-      cursor:pointer;transition:transform .08s ease, filter .2s ease;
+      cursor:pointer;transition:transform .08s ease, filter .25s ease, box-shadow .25s ease, background .25s ease;
     }
     .btn.primary{
       background:linear-gradient(90deg,var(--accent),var(--accent-2));
       border:0;color:var(--deep-brown);
+      box-shadow:0 0 0 0 rgba(250,215,209,0);
     }
-    .btn:hover{filter:brightness(1.05)}
+    .btn.primary:hover{
+      /* насиченіший рожевий та легке світіння */
+      background:linear-gradient(90deg,var(--accent-3),var(--accent));
+      filter:brightness(1.03);
+      box-shadow:0 8px 26px rgba(250,215,209,.20), 0 0 0 1px rgba(250,215,209,.25) inset;
+    }
     .btn:active{transform:translateY(1px)}
 
+    /* Клавіша фокусу */
+    .btn:focus-visible{
+      outline:none;
+      box-shadow:0 0 0 3px rgba(250,215,209,.35);
+    }
+
     /* ===== 7) THUMBNAILS ===== */
-    .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-    .thumb{background:#141414;border:1px solid var(--line);border-radius:12px;
-      display:flex;align-items:center;justify-content:center;min-height:86px;cursor:pointer;position:relative}
-    .thumb.active{outline:2px solid var(--accent)}
+    .thumbs{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:12px;margin-top:12px
+    }
+    .thumb{
+      background:#141414;border:1px solid var(--line);border-radius:12px;
+      display:flex;align-items:center;justify-content:center;min-height:86px;cursor:pointer;position:relative;
+      transition:transform .25s ease, box-shadow .25s ease, outline-color .25s ease, background .25s ease;
+      will-change:transform, box-shadow;
+      overflow:hidden;
+    }
+    .thumb img{
+      max-width:90%;object-fit:contain;
+      transition:transform .25s ease, filter .25s ease;
+      will-change:transform, filter;
+    }
+    .thumb:hover{
+      transform:translateY(-2px) scale(1.03);
+      box-shadow:0 10px 30px rgba(250,215,209,.12);
+      background:#171717;
+    }
+    .thumb:hover img{
+      transform:scale(1.04);
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    }
+    .thumb.active{ outline:2px solid var(--accent) }
+
+    /* Пульсуюче сяйво при hover */
+    .thumb::after{
+      content:""; position:absolute; inset:-1px; border-radius:12px;
+      background:radial-gradient(120px 60px at 50% 120%, rgba(250,215,209,.0), rgba(250,215,209,.12) 70%, rgba(250,215,209,.0) 100%);
+      opacity:0; transition:opacity .25s ease;
+      pointer-events:none;
+    }
+    .thumb:hover::after{ opacity:1 }
+
+    /* Зменшуємо рух для користувачів із reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .btn,.thumb,.thumb img{ transition:none }
+      .scan{ animation:none }
+    }
 
     /* ===== 8) CANVAS ===== */
     canvas{width:100%;background:#0a0a0a;border:1px dashed rgba(250,215,209,.35);border-radius:12px}
@@ -228,8 +278,6 @@
       const img=document.createElement('img');
       img.src=itemPaths[key];
       img.alt=key;
-      img.style.maxWidth='90%';
-      img.style.objectFit='contain';
       el.appendChild(img);
     });
 
