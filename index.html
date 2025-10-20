@@ -5,58 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PFP Item Forge</title>
   <style>
-    /* ===========================
-       1) FONT-FACE DECLARATIONS
-       Place files in /fonts/ (same level as index.html)
-       If filenames differ — update src: urls below.
-       =========================== */
+    /* 1) FONT-FACE (поклади файли у /fonts) */
     @font-face{
       font-family: "SimplonMono-Light";
       src: url("fonts/SimplonMono-Light.woff2") format("woff2"),
            url("fonts/SimplonMono-Light.woff") format("woff");
-      font-weight: 300;
-      font-style: normal;
-      font-display: swap;
+      font-weight: 300; font-style: normal; font-display: swap;
     }
     @font-face{
       font-family: "Mondwest";
       src: url("fonts/Mondwest.woff2") format("woff2"),
            url("fonts/Mondwest.woff") format("woff");
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
+      font-weight: 400; font-style: normal; font-display: swap;
     }
     @font-face{
       font-family: "Aux Mono";
       src: url("fonts/AuxMono-Regular.woff2") format("woff2"),
            url("fonts/AuxMono-Regular.woff") format("woff");
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
+      font-weight: 400; font-style: normal; font-display: swap;
     }
 
-    /* ===========================
-       2) THEME TOKENS (your palette)
-       =========================== */
+    /* 2) THEME TOKENS */
     :root{
-      --bg:#0a0a0a;            /* Background */
-      --panel:#121212;         /* Panels */
-      --line:#3a1a12;          /* Deep brown line */
-      --accent:#fad7d1;        /* Primary Pink */
-      --accent-2:#f3c2b9;      /* Pink shade */
-      --text:#ffffff;          /* White */
-      --muted:#d7b9b3;         /* Soft pink-muted */
-      --deep-brown:#230800;    /* Deep Brown for text on pink */
+      --bg:#0a0a0a;
+      --panel:#121212;
+      --line:#3a1a12;
+      --accent:#fad7d1;
+      --accent-2:#f3c2b9;
+      --text:#ffffff;
+      --muted:#d7b9b3;
+      --deep-brown:#230800;
     }
 
-    /* ===========================
-       3) BASE
-       =========================== */
+    /* 3) BASE */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      /* Base font: Simplon Mono Light for maximum readability */
       font-family:"SimplonMono-Light", ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "Courier New", monospace;
       font-weight:300;
       background: url('items/background.png') no-repeat center center fixed;
@@ -65,9 +50,7 @@
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
-
     h1,h2,h3,.title,.btn.primary{
-      /* Accents & big moments use Mondwest */
       font-family:"Mondwest", system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
       letter-spacing:.02em;
     }
@@ -75,9 +58,7 @@
     .wrap{max-width:1280px;margin:28px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:1fr;}
     @media(min-width:1100px){.wrap{grid-template-columns:1.2fr .9fr}}
 
-    /* ===========================
-       4) STAGE / CANVAS
-       =========================== */
+    /* 4) STAGE / CANVAS */
     .stage{
       position:relative;background:linear-gradient(180deg,#111,#0f0f0f);
       border:1px solid var(--line);border-radius:16px;padding:18px;
@@ -88,55 +69,45 @@
     .scan{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent, var(--accent), transparent);opacity:.5;animation:scan 3.6s linear infinite}
     @keyframes scan{0%{transform:translateY(0)}100%{transform:translateY(640px)}}
 
-    /* ===========================
-       5) PANELS
-       =========================== */
+    /* 5) PANELS */
     .panel{background:linear-gradient(180deg,#121212,#111);border:1px solid var(--line);border-radius:16px;padding:16px}
     .panel + .panel{margin-top:10px}
     .title{display:flex;align-items:center;gap:10px;font-weight:700}
     .dot{width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 3px rgba(250,215,209,.25)}
     .muted{color:var(--muted);font-size:12px}
 
-    /* ===========================
-       6) BUTTONS
-       =========================== */
-.btn{
-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
-background:#1a1f2e;color:var(--text);border:1px solid var(--line);
-border-radius:12px;padding:14px 16px;
-font-family:"Aux Mono", "SimplonMono-Light", ui-monospace, monospace;
-font-weight:500; /* трохи жирніший */
-letter-spacing:.06em;text-transform:uppercase;
-cursor:pointer;transition:transform .08s ease, filter .2s ease;
-}
-.btn.primary{
-background:linear-gradient(90deg,var(--accent),var(--accent-2));
-border:0;color:var(--deep-brown);
-font-family:"Mondwest", system-ui, sans-serif;
-font-weight:600; /* кнопки ще більш виразні */
-}
+    /* 6) BUTTONS */
+    .btn{
+      appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;
+      background:#1a1f2e;color:var(--text);border:1px solid var(--line);
+      border-radius:12px;padding:14px 16px;
+      font-family:"Aux Mono","SimplonMono-Light",ui-monospace,monospace;
+      font-weight:500; /* трохи жирніший */
+      letter-spacing:.06em;text-transform:uppercase;
+      cursor:pointer;transition:transform .08s ease, filter .2s ease;
+    }
+    .btn.primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      border:0;color:var(--deep-brown);
+      font-family:"Mondwest", system-ui, sans-serif;
+      font-weight:600; /* ще жирніше для primary */
+    }
     .btn:hover{filter:brightness(1.05)}
     .btn:active{transform:translateY(1px)}
 
-    /* ===========================
-       7) THUMBNAILS
-       =========================== */
+    /* 7) THUMBNAILS */
     .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
     .thumb{background:#141414;border:1px solid var(--line);border-radius:12px;
       display:flex;align-items:center;justify-content:center;min-height:86px;cursor:pointer;position:relative}
     .thumb.active{outline:2px solid var(--accent)}
 
-    /* ===========================
-       8) CANVAS
-       =========================== */
+    /* 8) CANVAS */
     canvas{width:100%;background:#0a0a0a;border:1px dashed rgba(250,215,209,.35);border-radius:12px}
 
-    /* ===========================
-       9) CONTROLS
-       =========================== */
+    /* 9) CONTROLS */
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
     input[type="range"]{width:100%;accent-color:var(--accent)}
-    label{display:block;margin:6px 0;color:var(--muted);font-family:"Aux Mono", "SimplonMono-Light", ui-monospace, monospace}
+    label{display:block;margin:6px 0;color:var(--muted);font-family:"Aux Mono","SimplonMono-Light",ui-monospace,monospace}
     .bar{display:flex;gap:10px;margin-top:14px}
   </style>
 </head>
@@ -161,6 +132,9 @@ font-weight:600; /* кнопки ще більш виразні */
           <div class="thumb" data-mask="cap1" title="Cap A"></div>
           <div class="thumb" data-mask="cap2" title="Cap B"></div>
           <div class="thumb" data-mask="bucket" title="Bucket Hat"></div>
+          <div class="thumb" data-mask="cap3" title="Cap C"></div>
+          <div class="thumb" data-mask="cap4" title="Cap D"></div>
+          <div class="thumb" data-mask="cap5" title="Cap E"></div>
         </div>
         <div class="row">
           <div>
@@ -196,7 +170,7 @@ font-weight:600; /* кнопки ще більш виразні */
   </main>
 
   <script>
-    // --- DOM refs
+    // DOM refs
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
     const photoInput = document.getElementById('photo');
@@ -212,10 +186,10 @@ font-weight:600; /* кнопки ще більш виразні */
     // Open file dialog
     pickPhotoBtn.addEventListener('click', () => photoInput.click());
 
-    // --- State
+    // State
     const state = { bgImg:null, capImg:null, cap:{x:0,y:0,w:0,h:0,scale:1,rot:0,alpha:1} };
 
-    // --- Helpers
+    // Helpers
     function loadImageFromFile(file){
       return new Promise((resolve, reject)=>{
         const reader = new FileReader();
@@ -229,7 +203,6 @@ font-weight:600; /* кнопки ще більш виразні */
         reader.readAsDataURL(file);
       });
     }
-
     function fitCanvasToImage(img){
       const MAX=1400;let w=img.naturalWidth,h=img.naturalHeight;
       const k=Math.min(1,MAX/Math.max(w,h));
@@ -237,13 +210,20 @@ font-weight:600; /* кнопки ще більш виразні */
     }
 
     // Items (must exist in /items/)
-    const itemPaths={cap1:'items/cap-a.png',cap2:'items/cap-b.png',bucket:'items/bucket-hat.png'};
+    const itemPaths={
+      cap1:'items/cap-a.png',
+      cap2:'items/cap-b.png',
+      bucket:'items/bucket-hat.png',
+      cap3:'items/cap-c.png',
+      cap4:'items/cap-d.png',
+      cap5:'items/cap-e.png'
+    };
     const presets={}; // preloaded images for items
     Object.entries(itemPaths).forEach(([k,src])=>{
       const i=new Image(); i.src=src; presets[k]=i;
     });
 
-    // Fill thumbnails
+    // Thumbnails
     Array.from(thumbs.querySelectorAll('.thumb')).forEach(el=>{
       const key=el.getAttribute('data-mask');
       const img=document.createElement('img');
@@ -293,7 +273,7 @@ font-weight:600; /* кнопки ще більш виразні */
       const dx=mx-cx,dy=my-cy; const ang=-rot*Math.PI/180;
       const rx=dx*Math.cos(ang)-dy*Math.sin(ang);
       const ry=dx*Math.sin(ang)+dy*Math.cos(ang);
-      return (rx>=-cw/2&&rx<=cw/2&&ry>=-ch/2&&ry<=- -ch/2);
+      return (rx>=-cw/2&&rx<=cw/2&&ry>=-ch/2&&ry<=ch/2);
     }
     canvas.addEventListener('mousedown',e=>{
       const r=canvas.getBoundingClientRect();
@@ -388,7 +368,7 @@ font-weight:600; /* кнопки ще більш виразні */
       if(changed){ e.preventDefault(); render(); }
     });
 
-    // Initial render (without any item selected)
+    // Initial render (no item selected)
     render();
   </script>
 </body>
