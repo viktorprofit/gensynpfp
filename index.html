@@ -44,21 +44,27 @@
       font-family: 'Fraunces', serif;
       font-weight: 700;
       font-size: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       text-align: center;
       letter-spacing: 0.02em;
     }
 
     .row {
       display: flex;
+      justify-content: space-between;
       align-items: baseline;
-      gap: 8px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
 
     .row:last-child {
       border-bottom: none;
+    }
+
+    .value {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 15px;
     }
 
     .label {
@@ -66,21 +72,9 @@
       font-size: 11px;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      margin-left: 10px;
       white-space: nowrap;
       flex-shrink: 0;
-    }
-
-    .dots {
-      flex: 1 1 auto;
-      border-bottom: 1px dotted rgba(255, 255, 255, 0.16);
-      transform: translateY(-2px);
-    }
-
-    .value {
-      font-family: 'Fraunces', serif;
-      font-weight: 700;
-      font-size: 15px;
-      white-space: nowrap;
     }
 
     @media (max-width: 400px) {
@@ -99,33 +93,28 @@
     <div class="title">Real Bulkoor — Passport Card</div>
 
     <div class="row">
-      <span class="label">Name</span>
-      <span class="dots"></span>
       <span class="value">Real Bulkoor</span>
+      <span class="label">Name</span>
     </div>
 
     <div class="row">
-      <span class="label">Discord</span>
-      <span class="dots"></span>
       <span class="value">@handle</span>
+      <span class="label">Discord</span>
     </div>
 
     <div class="row">
-      <span class="label">Bullish</span>
-      <span class="dots"></span>
       <span class="value">Bullish</span>
+      <span class="label">Bullish</span>
     </div>
 
     <div class="row">
-      <span class="label">Member ID</span>
-      <span class="dots"></span>
       <span class="value">BLK-000001</span>
+      <span class="label">Member ID</span>
     </div>
 
     <div class="row">
-      <span class="label">Valid Thru</span>
-      <span class="dots"></span>
       <span class="value">∞</span>
+      <span class="label">Valid Thru</span>
     </div>
   </div>
 </body>
