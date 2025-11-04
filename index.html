@@ -6,115 +6,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-1: #1B1A14;
-      --bg-2: #14130F;
-      --text: #EDEBE6;
-      --muted: #A8A59C;
-      --border: #2B2A25;
+    :root{
+      --bg-1:#1B1A14; --bg-2:#14130F;
+      --text:#EDEBE6; --muted:#A8A59C; --border:#2B2A25;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg-1); color:var(--text);
+      font:14px/1.35 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
 
-    * {
-      box-sizing: border-box;
+    /* Все усередині ізольовано під #rb-passport, щоб інші стилі не перебивали */
+    #rb-passport{
+      width:100%; display:flex; align-items:center; justify-content:center; padding:32px;
+    }
+    #rb-passport .card{
+      width:340px; background:var(--bg-2);
+      border:1px solid var(--border); border-radius:12px;
+      box-shadow:0 0 18px rgba(0,0,0,.4);
+      padding:32px 28px; text-align:left;
+    }
+    #rb-passport .title{
+      font-family:'Fraunces', serif; font-weight:700; font-size:18px;
+      margin:0 0 22px; text-align:center; letter-spacing:.02em;
     }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg-1);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    /* Рядок: значення зліва, лейбл справа */
+    #rb-passport .row{
+      display:flex !important;               /* підвищуємо пріоритет */
+      justify-content:space-between !important;
+      align-items:baseline !important;
+      gap:12px; padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      min-width:0; /* щоб працювали перенос/обрізання при довгих значеннях */
+    }
+    #rb-passport .row:last-child{ border-bottom:none }
+
+    #rb-passport .value{
+      font-family:'Fraunces', serif; font-weight:700; font-size:15px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* захист від довгих рядків */
+      max-width:65%; /* залишаємо простір для правого лейблу */
+    }
+    #rb-passport .label{
+      color:var(--muted); font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+      white-space:nowrap; flex-shrink:0; margin-left:10px;
+      text-align:right;
     }
 
-    .card {
-      width: 340px;
-      background: var(--bg-2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 0 18px rgba(0, 0, 0, 0.4);
-      padding: 32px 28px;
-      text-align: left;
-    }
-
-    .title {
-      font-family: 'Fraunces', serif;
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 22px;
-      text-align: center;
-      letter-spacing: 0.02em;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .row:last-child {
-      border-bottom: none;
-    }
-
-    .value {
-      font-family: 'Fraunces', serif;
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .label {
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-left: 10px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    @media (max-width: 400px) {
-      .card {
-        width: 90%;
-        padding: 24px 20px;
-      }
-      .value {
-        font-size: 14px;
-      }
+    @media (max-width: 400px){
+      #rb-passport .card{ width:90%; padding:24px 20px }
+      #rb-passport .value{ font-size:14px; max-width:60% }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="title">Real Bulkoor — Passport Card</div>
+  <div id="rb-passport">
+    <div class="card">
+      <h1 class="title">Real Bulkoor — Passport Card</h1>
 
-    <div class="row">
-      <span class="value">Real Bulkoor</span>
-      <span class="label">Name</span>
-    </div>
+      <div class="row">
+        <span class="value">Real Bulkoor</span>
+        <span class="label">Name</span>
+      </div>
 
-    <div class="row">
-      <span class="value">@handle</span>
-      <span class="label">Discord</span>
-    </div>
+      <div class="row">
+        <span class="value">@handle</span>
+        <span class="label">Discord</span>
+      </div>
 
-    <div class="row">
-      <span class="value">Bullish</span>
-      <span class="label">Bullish</span>
-    </div>
+      <div class="row">
+        <span class="value">Bullish</span>
+        <span class="label">Bullish</span>
+      </div>
 
-    <div class="row">
-      <span class="value">BLK-000001</span>
-      <span class="label">Member ID</span>
-    </div>
+      <div class="row">
+        <span class="value">BLK-000001</span>
+        <span class="label">Member ID</span>
+      </div>
 
-    <div class="row">
-      <span class="value">∞</span>
-      <span class="label">Valid Thru</span>
+      <div class="row">
+        <span class="value">∞</span>
+        <span class="label">Valid Thru</span>
+      </div>
     </div>
   </div>
 </body>
