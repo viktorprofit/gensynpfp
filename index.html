@@ -5,139 +5,42 @@
   <title>Real Bulkoor — Passport Card</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
-<body style="margin:0; background:#1B1A14; min-height:100vh; display:flex; align-items:center; justify-content:center;">
+<body style="margin:0; background:#1B1A14; color:#EDEBE6; min-height:100vh; display:flex; align-items:center; justify-content:center; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
 
-  <!-- Ізольований компонент, щоб зміни точно були видимі -->
-  <rb-passport></rb-passport>
+  <div style="width:340px; background:#14130F; border:1px solid #2B2A25; border-radius:12px; box-shadow:0 0 18px rgba(0,0,0,.4); padding:32px 28px;">
+    <h1 style="margin:0 0 22px; text-align:center; font-family:'Fraunces', serif; font-weight:700; font-size:18px; letter-spacing:.02em;">
+      Real Bulkoor — Passport Card
+    </h1>
 
-  <script>
-    class RBPassport extends HTMLElement {
-      connectedCallback() {
-        const root = this.attachShadow({ mode: 'open' });
-        root.innerHTML = `
-<style>
-  :host { display:block; }
-  @font-face {
-    font-family: "Inter";
-    src: local("Inter");
-    font-weight: 400 800;
-  }
-  @font-face {
-    font-family: "Fraunces";
-    src: local("Fraunces");
-    font-weight: 600 800;
-  }
-
-  :root {
-    --bg-1:#1B1A14; --bg-2:#14130F; --text:#EDEBE6; --muted:#A8A59C; --border:#2B2A25;
-  }
-
-  .wrap {
-    color: var(--text);
-    font: 14px/1.35 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    display:flex; align-items:center; justify-content:center; padding:32px;
-  }
-
-  .card {
-    width: 340px;
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 0 18px rgba(0,0,0,.4);
-    padding: 32px 28px;
-  }
-
-  .title {
-    font-family: "Fraunces", serif;
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: .02em;
-    text-align: center;
-    margin: 0 0 22px;
-  }
-
-  .row {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .row:last-child { border-bottom: none; }
-
-  .value {
-    font-family: "Fraunces", serif;
-    font-weight: 700;
-    font-size: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 65%;
-  }
-
-  .dots {
-    flex: 1 1 auto;
-    border-bottom: 1px dotted rgba(255,255,255,.16);
-    transform: translateY(-2px);
-    min-width: 12px; /* щоб лінія не зникала на вузьких екранах */
-  }
-
-  .label {
-    color: var(--muted);
-    font-size: 11px;
-    letter-spacing: .05em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-align: right;
-  }
-
-  @media (max-width: 400px) {
-    .card { width: 90%; padding: 24px 20px; }
-    .value { font-size: 14px; max-width: 60%; }
-  }
-</style>
-
-<div class="wrap">
-  <div class="card" role="region" aria-label="Real Bulkoor — Passport Card">
-    <h1 class="title">Real Bulkoor — Passport Card</h1>
-
-    <div class="row">
-      <span class="value">Real Bulkoor</span>
-      <span class="dots"></span>
-      <span class="label">Name</span>
+    <!-- ROW -->
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); min-width:0;">
+      <span style="font-family:'Fraunces', serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">Real Bulkoor</span>
+      <span style="color:#A8A59C; font-size:11px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; text-align:right;">Name</span>
     </div>
 
-    <div class="row">
-      <span class="value">@handle</span>
-      <span class="dots"></span>
-      <span class="label">Discord</span>
+    <!-- ROW -->
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); min-width:0;">
+      <span style="font-family:'Fraunces', serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">@handle</span>
+      <span style="color:#A8A59C; font-size:11px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; text-align:right;">Discord</span>
     </div>
 
-    <div class="row">
-      <span class="value">Bullish</span>
-      <span class="dots"></span>
-      <span class="label">Bullish</span>
+    <!-- ROW -->
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); min-width:0;">
+      <span style="font-family:'Fraunces', serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">Bullish</span>
+      <span style="color:#A8A59C; font-size:11px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; text-align:right;">Bullish</span>
     </div>
 
-    <div class="row">
-      <span class="value">BLK-000001</span>
-      <span class="dots"></span>
-      <span class="label">Member ID</span>
+    <!-- ROW -->
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); min-width:0;">
+      <span style="font-family:'Fraunces', serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">BLK-000001</span>
+      <span style="color:#A8A59C; font-size:11px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; text-align:right;">Member ID</span>
     </div>
 
-    <div class="row">
-      <span class="value">∞</span>
-      <span class="dots"></span>
-      <span class="label">Valid Thru</span>
+    <!-- ROW -->
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; min-width:0;">
+      <span style="font-family:'Fraunces', serif; font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">∞</span>
+      <span style="color:#A8A59C; font-size:11px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; text-align:right;">Valid Thru</span>
     </div>
   </div>
-</div>
-        `;
-      }
-    }
-    customElements.define('rb-passport', RBPassport);
-  </script>
 </body>
 </html>
