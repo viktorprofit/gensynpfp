@@ -33,57 +33,65 @@
       font-size:14px;
       line-height:1.3;
     }
-    .fields {
-      display:grid;
-      gap:10px;
-    }
-    .field {
-      display:grid;
-      grid-template-columns: 100px 1fr;
+
+    .row {
+      display:flex;
       align-items:baseline;
-      padding:4px 0;
+      gap:8px;
+      padding:8px 0;
       border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .field:last-child {
+    .row:last-child {
       border-bottom:none;
     }
+
     .label {
       color:var(--muted);
-      font-weight:600;
       font-size:11px;
       letter-spacing:.05em;
       text-transform:uppercase;
+      white-space:nowrap;
+      flex-shrink:0;
+    }
+    .dots {
+      flex:1 1 auto;
+      border-bottom:1px dotted rgba(255,255,255,.16);
+      transform:translateY(-2px);
     }
     .value {
       font-family:'Fraunces', serif;
       font-weight:700;
       font-size:15px;
+      white-space:nowrap;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="fields">
-      <div class="field">
-        <div class="label">Name</div>
-        <div class="value">Real Bulkoor</div>
-      </div>
-      <div class="field">
-        <div class="label">Discord</div>
-        <div class="value">@handle</div>
-      </div>
-      <div class="field">
-        <div class="label">Bullish</div>
-        <div class="value">Bullish</div>
-      </div>
-      <div class="field">
-        <div class="label">Member ID</div>
-        <div class="value">BLK-000001</div>
-      </div>
-      <div class="field">
-        <div class="label">Valid Thru</div>
-        <div class="value">∞</div>
-      </div>
+    <div class="row">
+      <span class="label">Name</span>
+      <span class="dots"></span>
+      <span class="value">Real Bulkoor</span>
+    </div>
+    <div class="row">
+      <span class="label">Discord</span>
+      <span class="dots"></span>
+      <span class="value">@handle</span>
+    </div>
+    <div class="row">
+      <span class="label">Bullish</span>
+      <span class="dots"></span>
+      <span class="value">Bullish</span>
+    </div>
+    <div class="row">
+      <span class="label">Member ID</span>
+      <span class="dots"></span>
+      <span class="value">BLK-000001</span>
+    </div>
+    <div class="row">
+      <span class="label">Valid Thru</span>
+      <span class="dots"></span>
+      <span class="value">∞</span>
     </div>
   </div>
 </body>
